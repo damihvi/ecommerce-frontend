@@ -105,6 +105,17 @@ const Navigation: React.FC = () => {
                 )}
               </Link>
             )}
+            
+            {isAuthenticated && (
+              <Link
+                to="/admin/products"
+                className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
+                  isActive('/admin/products') ? 'text-primary-600' : ''
+                }`}
+              >
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Search Bar */}

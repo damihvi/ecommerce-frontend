@@ -57,6 +57,19 @@ export const productsAPI = {
   getById: (id: string) => apiClient.get(`/products/${id}`),
   getFeatured: () => apiClient.get('/products/featured'),
   getByCategory: (categoryId: string) => apiClient.get(`/products/category/${categoryId}`),
+  create: (productData: FormData) => apiClient.post('/products', productData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id: string, productData: FormData) => apiClient.put(`/products/${id}`, productData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  uploadImage: (productId: string, imageFile: FormData) => 
+    apiClient.post(`/products/${productId}/image`, imageFile, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  deleteImage: (productId: string, imageId: string) => 
+    apiClient.delete(`/products/${productId}/images/${imageId}`),
+  getImageUrl: (imagePath: string) => `${API_BASE_URL}/uploads/${imagePath}`,
 };
 
 export const categoriesAPI = {
