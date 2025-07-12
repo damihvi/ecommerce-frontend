@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API base URL
-export const API_BASE_URL = 'http://localhost:3010/api';
+// API base URL - VPS Production Server
+export const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api';
 
 // Create axios instance
 export const apiClient = axios.create({
