@@ -79,7 +79,9 @@ const AdminDashboard: React.FC = () => {
     queryKey: ['products'],
     queryFn: async () => {
       const response = await productsAPI.getAll();
-      return response.data;
+      console.log('Products API response:', response.data);
+      // Ensure we return an array
+      return Array.isArray(response.data) ? response.data : [];
     },
   });
 
@@ -88,7 +90,9 @@ const AdminDashboard: React.FC = () => {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await categoriesAPI.getAll();
-      return response.data;
+      console.log('Categories API response:', response.data);
+      // Ensure we return an array
+      return Array.isArray(response.data) ? response.data : [];
     },
   });
 
@@ -426,14 +430,14 @@ const AdminDashboard: React.FC = () => {
                           Cargando productos...
                         </td>
                       </tr>
-                    ) : products?.length === 0 ? (
+                    ) : !Array.isArray(products) || products.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
                           No hay productos registrados
                         </td>
                       </tr>
                     ) : (
-                      products?.map((product: Product) => (
+                      products.map((product: Product) => (
                         <tr key={product.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
@@ -521,12 +525,12 @@ const AdminDashboard: React.FC = () => {
                 <div className="col-span-full text-center text-gray-500">
                   Cargando categorías...
                 </div>
-              ) : categories?.length === 0 ? (
+              ) : !Array.isArray(categories) || categories.length === 0 ? (
                 <div className="col-span-full text-center text-gray-500">
                   No hay categorías registradas
                 </div>
               ) : (
-                categories?.map((category: Category) => (
+                categories.map((category: Category) => (
                   <div key={category.id} className="bg-white rounded-lg shadow p-6">
                     <div className="flex justify-between items-start mb-4">
                       <h3 className="text-lg font-medium text-gray-900">
@@ -737,7 +741,7 @@ const AdminDashboard: React.FC = () => {
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       >
                         <option value={0}>Selecciona una categoría</option>
-                        {categories?.map((category: Category) => (
+                        {Array.isArray(categories) && categories.map((category: Category) => (
                           <option key={category.id} value={category.id}>
                             {category.name}
                           </option>
