@@ -53,26 +53,27 @@ const Home: React.FC = () => {
           </div>
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
           <div className="text-center">
-            <div className="mb-8">
-              <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 animate-float">
+            <div className="mb-6 sm:mb-8">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-display font-bold text-white mb-4 sm:mb-6 animate-float px-2">
                 Bienvenido a{' '}
                 <span className="gradient-text bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                   Damihvi's Ecommerce
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
                 Descubre productos increíbles con experiencias únicas en mi proyecto de final de semestre.
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <Link
                 to="/products"
-                className="btn-primary text-lg px-8 py-4 transform hover:scale-105 transition-all duration-200 shadow-2xl"
+                className="btn-primary text-lg px-6 py-3 sm:px-8 sm:py-4 transform hover:scale-105 transition-all duration-200 shadow-2xl w-full sm:w-auto text-center"
               >
-                <span className="flex items-center space-x-2">
+                <span className="flex items-center justify-center space-x-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
@@ -81,28 +82,31 @@ const Home: React.FC = () => {
               </Link>
               <Link
                 to="/about"
-                className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-2xl font-semibold hover:bg-white/20 transition-all duration-200 border border-white/20"
+                className="px-6 py-3 sm:px-8 sm:py-4 bg-white/10 backdrop-blur-sm text-white rounded-2xl font-semibold hover:bg-white/20 transition-all duration-200 border border-white/20 w-full sm:w-auto text-center"
               >
                 Conoce Más
               </Link>
             </div>
 
-            {/* Backend Status */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 inline-block border border-white/20">
-              <p className="text-white/90 font-medium">{backendStatus}</p>
-            </div>
-            
-            {/* Auth Debug Info */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mt-4 inline-block border border-white/20">
-              <div className="text-white/90 font-medium">
-                <p>🔐 Auth Status: {isAuthenticated ? '✅ Logged In' : '❌ Not Logged In'}</p>
-                {user && (
-                  <div className="mt-2 text-sm">
-                    <p>👤 User: {user.firstName} {user.lastName}</p>
-                    <p>📧 Email: {user.email}</p>
-                    <p>🏷️ Role: {user.role}</p>
-                  </div>
-                )}
+            {/* Status Cards Container */}
+            <div className="space-y-4 w-full max-w-2xl mx-auto">
+              {/* Backend Status */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 w-full">
+                <p className="text-white/90 font-medium text-center">{backendStatus}</p>
+              </div>
+              
+              {/* Auth Debug Info */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 w-full">
+                <div className="text-white/90 font-medium text-center">
+                  <p className="mb-2">🔐 Auth Status: {isAuthenticated ? '✅ Logged In' : '❌ Not Logged In'}</p>
+                  {user && (
+                    <div className="text-sm space-y-1">
+                      <p>👤 User: {user.firstName} {user.lastName}</p>
+                      <p>📧 Email: {user.email}</p>
+                      <p>🏷️ Role: {user.role}</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
