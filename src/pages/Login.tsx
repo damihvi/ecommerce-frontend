@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 interface LoginFormData {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -53,11 +53,11 @@ const Login: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label htmlFor="identifier" className="sr-only">
                 Email address
               </label>
               <input
-                {...register('email', {
+                {...register('identifier', {
                   required: 'Email is required',
                   pattern: {
                     value: /^\S+@\S+$/i,
@@ -69,8 +69,8 @@ const Login: React.FC = () => {
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              {errors.identifier && (
+                <p className="mt-1 text-sm text-red-600">{errors.identifier.message}</p>
               )}
             </div>
             <div>

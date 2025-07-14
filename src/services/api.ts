@@ -7,6 +7,7 @@ export const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-sof
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true, // Importante para CORS
   headers: {
     'Content-Type': 'application/json',
   },
@@ -44,7 +45,7 @@ apiClient.interceptors.response.use(
 
 // API endpoints
 export const authAPI = {
-  login: (credentials: { username: string; password: string }) =>
+  login: (credentials: { identifier: string; password: string }) =>
     apiClient.post('/auth/login', credentials),
   register: (userData: { username: string; email: string; password: string }) =>
     apiClient.post('/auth/register', userData),
