@@ -47,40 +47,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
+    const token = localStorage.getItem('token');
+    console.log('AuthProvider - Token found:', !!token); // Debug log
+    
+    if (token) {
       try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          // Verify token and get user info
-          const response = await apiClient.get('/auth/profile');
-          console.log('Profile response:', response.data); // Debug log
-          
-          // Manejar diferentes estructuras de respuesta
-          let userData;
-          if (response.data.success) {
-            userData = response.data.data || response.data.user;
-          } else {
-            userData = response.data.user || response.data;
-          }
-          
-          if (userData) {
-            setUser(userData);
-            console.log('User profile loaded:', userData); // Debug log
-          }
-        }
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        // Aquí podrías hacer una validación del token si es necesario
+        console.log('AuthProvider - Token set in headers'); // Debug log
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        console.error('AuthProvider - Error setting token:', error);
         localStorage.removeItem('token');
-      } finally {
-        setLoading(false);
       }
-    };
-
-    initAuth();
+    }
+    
+    setLoading(false);
+    console.log('AuthProvider - Loading complete'); // Debug log
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
     try {
+      console.log('AuthProvider - Login attempt started'); // Debug log
       const response = await authAPI.login({ 
         identifier: credentials.identifier, 
         password: credentials.password 
@@ -102,10 +89,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (token) {
         localStorage.setItem('token', token);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        console.log('AuthProvider - Token saved and set'); // Debug log
       }
       
       if (userData) {
         setUser(userData);
+        console.log('AuthProvider - User set:', userData); // Debug log
       }
       
       console.log('User set:', userData); // Debug log

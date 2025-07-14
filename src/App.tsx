@@ -6,7 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
-import Home from './pages/Home';
+import Home from './pages/Home_debug';
 import Products from './pages/Products';
 import Login from './pages/Login';
 import Register from './pages/Register';

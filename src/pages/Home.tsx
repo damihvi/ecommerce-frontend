@@ -6,7 +6,9 @@ import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
   const [backendStatus, setBackendStatus] = useState<string>('Checking...');
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
+
+  console.log('Home - Auth state:', { isAuthenticated, user, loading }); // Debug log
 
   useEffect(() => {
     // Test backend connection
@@ -42,8 +44,28 @@ const Home: React.FC = () => {
     },
   });
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-light-50 to-white">
+      {/* Debug Info */}
+      <div className="bg-blue-100 p-4 border-l-4 border-blue-500 text-blue-700">
+        <h3 className="font-bold">Estado de Debug:</h3>
+        <p>Autenticado: {isAuthenticated ? 'Sí' : 'No'}</p>
+        <p>Usuario: {user ? `${user.firstName} ${user.lastName}` : 'No definido'}</p>
+        <p>Backend: {backendStatus}</p>
+      </div>
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Background Animation */}
