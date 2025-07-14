@@ -43,7 +43,7 @@ interface CategoryFormData {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'stats'>('products');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -66,10 +66,13 @@ const AdminDashboard: React.FC = () => {
 
   // Redirect if not authenticated or not admin
   React.useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'ADMIN') {
+    console.log('AdminDashboard - Auth check:', { isAuthenticated, user, authLoading });
+    
+    if (!authLoading && !isAuthenticated) {
+      console.log('Not authenticated, redirecting to login');
       navigate('/login');
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, authLoading, navigate]);
 
   // Fetch products
   const { data: products, isLoading: productsLoading } = useQuery({
@@ -285,8 +288,26 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
-    return null;
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando acceso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Acceso Denegado</h2>
+          <p className="text-gray-600">Por favor inicia sesión para acceder al dashboard</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -300,11 +321,14 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600">
-                Bienvenido, {user?.firstName}
+                Bienvenido, {user?.firstName || 'Usuario'}
+              </div>
+              <div className="text-xs text-gray-500">
+                Rol: {user?.role || 'No definido'} | Estado: {isAuthenticated ? 'Autenticado' : 'No autenticado'}
               </div>
               <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-semibold text-sm">
-                  {user?.firstName?.charAt(0).toUpperCase()}
+                  {user?.firstName?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
             </div>
