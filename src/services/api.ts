@@ -61,9 +61,10 @@ export const productsAPI = {
   create: (productData: FormData) => apiClient.post('/products', productData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  update: (id: string, productData: FormData) => apiClient.put(`/products/${id}`, productData, {
+  update: (id: number, productData: FormData) => apiClient.put(`/products/${id}`, productData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  delete: (id: number) => apiClient.delete(`/products/${id}`),
   uploadImage: (productId: string, imageFile: FormData) => 
     apiClient.post(`/products/${productId}/image`, imageFile, {
       headers: { 'Content-Type': 'multipart/form-data' }
@@ -77,6 +78,9 @@ export const categoriesAPI = {
   getAll: () => apiClient.get('/categories'),
   getActive: () => apiClient.get('/categories/active'),
   getById: (id: string) => apiClient.get(`/categories/${id}`),
+  create: (categoryData: { name: string; description: string }) => apiClient.post('/categories', categoryData),
+  update: (id: number, categoryData: { name: string; description: string }) => apiClient.put(`/categories/${id}`, categoryData),
+  delete: (id: number) => apiClient.delete(`/categories/${id}`),
 };
 
 export const cartAPI = {

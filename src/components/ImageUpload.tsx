@@ -1,16 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { productsAPI } from '../services/api';
+﻿import React, { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 
-interface ImageUploadProps {
-  productId?: string;
+export interface ImageUploadProps {
   onImageUploaded?: (imageUrl: string) => void;
   currentImageUrl?: string;
   className?: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
-  productId,
   onImageUploaded,
   currentImageUrl,
   className = ''
@@ -23,137 +20,83 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Por favor selecciona un archivo de imagen válido');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('El archivo es demasiado grande. Máximo 5MB permitido');
       return;
     }
 
-    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreview(e.target?.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Upload file if productId is provided
-    if (productId) {
-      await uploadImage(file);
-    } else {
-      // If no productId, just call the callback with the file
-      onImageUploaded?.(file.name);
-    }
+    const imageUrl = URL.createObjectURL(file);
+    onImageUploaded?.(imageUrl);
   };
 
-  const uploadImage = async (file: File) => {
-    if (!productId) return;
-
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await productsAPI.uploadImage(productId, formData);
-      const imageUrl = response.data.imageUrl;
-      
-      toast.success('Imagen subida exitosamente');
-      onImageUploaded?.(imageUrl);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Error al subir la imagen');
-      setPreview(currentImageUrl || null);
-    } finally {
-      setIsUploading(false);
+  const handleRemoveImage = () => {
+    setPreview(null);
+    onImageUploaded?.('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      // Create a proper file input event
-      if (fileInputRef.current) {
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        fileInputRef.current.files = dataTransfer.files;
-        
-        const syntheticEvent = {
-          target: fileInputRef.current
-        } as React.ChangeEvent<HTMLInputElement>;
-        
-        handleFileSelect(syntheticEvent);
-      }
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
   };
 
   return (
-    <div className={`relative ${className}`}>
-      <div
-        className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
-        onClick={() => fileInputRef.current?.click()}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
-        {preview ? (
-          <div className="relative">
-            <img
-              src={preview.startsWith('data:') ? preview : productsAPI.getImageUrl(preview)}
-              alt="Preview"
-              className="max-h-48 mx-auto rounded-lg"
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-              <p className="text-white text-sm">Click para cambiar imagen</p>
-            </div>
-          </div>
-        ) : (
-          <div className="py-8">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 48 48"
-            >
-              <path
-                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
+    <div className={`space-y-4 ${className}`}>
+      <div className="flex items-center justify-center w-full">
+        <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-gray-400">
+          {preview ? (
+            <div className="relative w-full h-full">
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-full h-full object-cover rounded-lg"
               />
-            </svg>
-            <div className="mt-4">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium text-primary-600">Click para subir</span> o arrastra y suelta
-              </p>
-              <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF hasta 5MB</p>
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+              <svg className="w-8 h-8 mb-4 text-gray-500" fill="none" viewBox="0 0 20 16">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+              </svg>
+              <p className="mb-2 text-sm text-gray-500">
+                <span className="font-semibold">Click para subir</span> o arrastra y suelta
+              </p>
+              <p className="text-xs text-gray-500">
+                PNG, JPG, GIF hasta 5MB
+              </p>
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileSelect}
+            disabled={isUploading}
+          />
+        </label>
       </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-
+      
       {isUploading && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
-            <span className="text-sm text-gray-600">Subiendo imagen...</span>
-          </div>
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+          <span className="ml-2 text-sm text-gray-600">Subiendo imagen...</span>
         </div>
       )}
     </div>
