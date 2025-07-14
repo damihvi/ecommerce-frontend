@@ -27,153 +27,138 @@ const Navigation: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <Link
+      to={to}
+      className={`relative px-4 py-2 text-lg font-medium rounded-xl transition-all duration-200 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 ${
+        isActive(to) 
+          ? 'text-primary-600 bg-gradient-to-r from-primary-50 to-secondary-50' 
+          : 'text-dark-600 hover:text-primary-600'
+      }`}
+    >
+      {children}
+      {isActive(to) && (
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full"></div>
+      )}
+    </Link>
+  );
+
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="bg-white/80 backdrop-blur-md shadow-xl border-b border-white/20 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-3xl font-bold text-primary-600">
-                ECommerce
-              </span>
+            <Link to="/" className="flex-shrink-0 flex items-center group">
+              <div className="relative">
+                <span className="text-4xl font-display font-bold gradient-text">
+                  Damihvi
+                </span>
+                <div className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
-              className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/') ? 'text-primary-600' : ''
-              }`}
-            >
-              Inicio
-            </Link>
-            <Link
-              to="/products"
-              className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/products') ? 'text-primary-600' : ''
-              }`}
-            >
-              Productos
-            </Link>
-            <Link
-              to="/services"
-              className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/services') ? 'text-primary-600' : ''
-              }`}
-            >
-              Servicios
-            </Link>
-            <Link
-              to="/about"
-              className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/about') ? 'text-primary-600' : ''
-              }`}
-            >
-              Nosotros
-            </Link>
-            <Link
-              to="/blog"
-              className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/blog') ? 'text-primary-600' : ''
-              }`}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/contact"
-              className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/contact') ? 'text-primary-600' : ''
-              }`}
-            >
-              Contacto
-            </Link>
+          <div className="hidden lg:flex items-center space-x-1">
+            <NavLink to="/">Inicio</NavLink>
+            <NavLink to="/products">Productos</NavLink>
+            <NavLink to="/services">Servicios</NavLink>
+            <NavLink to="/about">Nosotros</NavLink>
+            <NavLink to="/blog">Blog</NavLink>
+            <NavLink to="/contact">Contacto</NavLink>
             
             {isAuthenticated && (
-              <Link
-                to="/cart"
-                className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors relative ${
-                  isActive('/cart') ? 'text-primary-600' : ''
-                }`}
-              >
-                Carrito
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
-            )}
-            
-            {isAuthenticated && (
-              <Link
-                to="/admin/products"
-                className={`text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors ${
-                  isActive('/admin/products') ? 'text-primary-600' : ''
-                }`}
-              >
-                Admin
-              </Link>
+              <>
+                <Link
+                  to="/cart"
+                  className={`relative px-4 py-2 text-lg font-medium rounded-xl transition-all duration-200 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 ${
+                    isActive('/cart') 
+                      ? 'text-primary-600 bg-gradient-to-r from-primary-50 to-secondary-50' 
+                      : 'text-dark-600 hover:text-primary-600'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8L5 3H3m4 10v6a2 2 0 002 2h8a2 2 0 002-2v-6" />
+                    </svg>
+                    {totalItems > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-pulse">
+                        {totalItems}
+                      </span>
+                    )}
+                  </div>
+                  {isActive('/cart') && (
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full"></div>
+                  )}
+                </Link>
+                <NavLink to="/admin/products">Admin</NavLink>
+              </>
             )}
           </div>
 
           {/* Search Bar */}
-          <div className="hidden md:flex items-center">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-400">🔍</span>
-              </div>
-              {searchTerm && (
-                <button
-                  type="button"
-                  onClick={() => setSearchTerm('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  <span className="text-gray-400 hover:text-gray-600">✕</span>
-                </button>
-              )}
-            </form>
-          </div>
-
-          {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
+            <form onSubmit={handleSearch} className="relative">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-72 pl-12 pr-4 py-3 bg-white/50 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm placeholder-dark-400 transition-all duration-200"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-dark-400 hover:text-dark-600"
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {/* Auth Buttons */}
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700 text-lg">
-                  ¡Bienvenido, {user?.firstName}!
-                </span>
+              <div className="flex items-center space-x-3">
                 <Link
                   to="/profile"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 text-dark-600 hover:text-primary-600 transition-colors"
                 >
-                  Perfil
+                  <div className="w-8 h-8 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">
+                      {user?.firstName?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <span className="font-medium">{user?.firstName}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-lg font-medium transition-colors"
+                  className="px-6 py-2 bg-gradient-to-r from-dark-500 to-dark-600 text-white rounded-xl hover:from-dark-600 hover:to-dark-700 transition-all duration-200 font-medium"
                 >
-                  Cerrar Sesión
+                  Salir
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 text-lg font-medium transition-colors"
+                  className="px-6 py-2 text-dark-600 hover:text-primary-600 font-medium transition-colors"
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-lg font-medium transition-colors"
+                  className="btn-primary"
                 >
                   Registrarse
                 </Link>
@@ -185,14 +170,23 @@ const Navigation: React.FC = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-primary-600 focus:outline-none focus:text-primary-600"
+              className="inline-flex items-center justify-center p-2 rounded-xl text-dark-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200"
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
+              <svg
+                className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <svg
+                className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
@@ -201,141 +195,103 @@ const Navigation: React.FC = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
+        <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-white/20">
+          <div className="px-2 pt-2 pb-3 space-y-1">
             {/* Mobile Search */}
-            <div className="px-3 py-2">
-              <form onSubmit={handleSearch} className="relative">
+            <form onSubmit={handleSearch} className="p-3">
+              <div className="relative">
                 <input
                   type="text"
                   placeholder="Buscar productos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                  className="w-full pl-10 pr-4 py-2 bg-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-400">🔍</span>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                  <svg className="h-5 w-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </div>
-                {searchTerm && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <span className="text-gray-400 hover:text-gray-600">✕</span>
-                  </button>
-                )}
-              </form>
-            </div>
-            <Link
-              to="/"
-              className={`block px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/') ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Inicio
-            </Link>
-            <Link
-              to="/products"
-              className={`block px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/products') ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Productos
-            </Link>
-            <Link
-              to="/services"
-              className={`block px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/services') ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Servicios
-            </Link>
-            <Link
-              to="/about"
-              className={`block px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/about') ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Nosotros
-            </Link>
-            <Link
-              to="/blog"
-              className={`block px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/blog') ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/contact"
-              className={`block px-3 py-2 text-lg font-medium transition-colors ${
-                isActive('/contact') ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contacto
-            </Link>
-            
-            {isAuthenticated && (
-              <Link
-                to="/cart"
-                className={`block px-3 py-2 text-lg font-medium transition-colors relative ${
-                  isActive('/cart') ? 'text-primary-600' : 'text-gray-700 hover:text-primary-600'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Carrito
-                {totalItems > 0 && (
-                  <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 inline-flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
+              </div>
+            </form>
+
+            {/* Mobile Navigation Links */}
+            <div className="space-y-1 px-3">
+              <Link to="/" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                Inicio
               </Link>
-            )}
-            
-            {isAuthenticated ? (
-              <>
-                <div className="px-3 py-2 text-base text-gray-500">
-                  ¡Bienvenido, {user?.firstName}!
+              <Link to="/products" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/products') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                Productos
+              </Link>
+              <Link to="/services" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/services') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                Servicios
+              </Link>
+              <Link to="/about" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/about') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                Nosotros
+              </Link>
+              <Link to="/blog" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/blog') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                Blog
+              </Link>
+              <Link to="/contact" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/contact') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                Contacto
+              </Link>
+
+              {isAuthenticated && (
+                <>
+                  <Link to="/cart" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/cart') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                    Carrito {totalItems > 0 && `(${totalItems})`}
+                  </Link>
+                  <Link to="/admin/products" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/admin/products') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                    Admin
+                  </Link>
+                  <Link to="/profile" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/profile') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                    Perfil
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Auth */}
+            <div className="pt-4 pb-3 border-t border-white/20 px-3">
+              {isAuthenticated ? (
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 px-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold">
+                        {user?.firstName?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-lg font-medium text-dark-800">{user?.firstName}</div>
+                      <div className="text-sm text-dark-500">{user?.email}</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 rounded-xl text-lg font-medium text-red-600 hover:bg-red-50"
+                  >
+                    Cerrar Sesión
+                  </button>
                 </div>
-                <Link
-                  to="/profile"
-                  className="block px-3 py-2 text-lg font-medium text-gray-700 hover:text-primary-600 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Perfil
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-3 py-2 text-lg font-medium text-gray-700 hover:text-primary-600 transition-colors"
-                >
-                  Cerrar Sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="block px-3 py-2 text-lg font-medium text-gray-700 hover:text-primary-600 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Iniciar Sesión
-                </Link>
-                <Link
-                  to="/register"
-                  className="block px-3 py-2 text-lg font-medium text-gray-700 hover:text-primary-600 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Registrarse
-                </Link>
-              </>
-            )}
+              ) : (
+                <div className="space-y-2">
+                  <Link
+                    to="/login"
+                    className="block w-full text-center px-4 py-2 border border-primary-300 rounded-xl text-primary-600 hover:bg-primary-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Iniciar Sesión
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="block w-full text-center btn-primary"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Registrarse
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { productsAPI, statsAPI, promotionsAPI } from '../services/api';
-import toast from 'react-hot-toast';
 
 const About: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [isSubscribing, setIsSubscribing] = useState(false);
 
   // Fetch stats from backend
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -69,63 +66,17 @@ const About: React.FC = () => {
     retryDelay: 1000,
   });
 
-  const handleNewsletterSubscription = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email.trim()) {
-      toast.error('Por favor ingresa tu email');
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      toast.error('Por favor ingresa un email válido');
-      return;
-    }
-
-    setIsSubscribing(true);
-    try {
-      // Simulate newsletter subscription
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success('¡Te has suscrito exitosamente a nuestro newsletter!');
-      setEmail('');
-    } catch (error) {
-      toast.error('Error al suscribirse. Intenta nuevamente.');
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Acerca de Nosotros</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Sobre mi</h1>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Promotional Banner */}
-        {activePromotions && activePromotions.length > 0 && (
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg p-6 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
-                <div>
-                  <h3 className="font-bold text-lg">{activePromotions[0].title}</h3>
-                  <p className="text-sm opacity-90">{activePromotions[0].description}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-mono text-xl font-bold">{activePromotions[0].code}</p>
-                <p className="text-sm opacity-90">Válido hasta: {activePromotions[0].validUntil}</p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Stats Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
@@ -148,7 +99,7 @@ const About: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Estadísticas placeholder</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Estadísticas de relleno</h3>
             {statsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -401,35 +352,6 @@ const About: React.FC = () => {
                 <p className="text-sm text-gray-600">Interfaz intuitiva y atractiva</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Newsletter Section */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white rounded-lg p-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Mantente al día con nosotros</h2>
-            <p className="text-lg mb-6 opacity-90">
-              Suscríbete a nuestro newsletter y recibe ofertas exclusivas, noticias de productos y actualizaciones.
-            </p>
-            <form onSubmit={handleNewsletterSubscription} className="max-w-md mx-auto">
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Tu email"
-                  className="flex-1 px-4 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
-                  disabled={isSubscribing}
-                />
-                <button
-                  type="submit"
-                  disabled={isSubscribing}
-                  className="bg-white text-primary-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50"
-                >
-                  {isSubscribing ? 'Enviando...' : 'Suscribirse'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
 

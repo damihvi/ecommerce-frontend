@@ -136,7 +136,7 @@ const Products: React.FC = () => {
                   : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
               }`}
             >
-              All Categories
+              Todas las categorias 
             </button>
             {Array.isArray(categories) && categories.map((category: Category) => (
               <button

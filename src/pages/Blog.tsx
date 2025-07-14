@@ -72,7 +72,7 @@ const Blog: React.FC = () => {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h1 className="text-3xl font-bold text-gray-900">Blog</h1>
-          <p className="text-gray-600 mt-2">Descubre las últimas noticias, consejos y tendencias</p>
+          <p className="text-gray-600 mt-2">Pagina de relleno para que se vea mas completo</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ const Blog: React.FC = () => {
               Destacado
             </span>
             <h2 className="text-3xl font-bold mt-4 mb-4">
-              El Futuro del E-commerce: Innovaciones que Están Cambiando el Juego
+              El Futuro es hoy
             </h2>
             <p className="text-xl opacity-90 mb-6">
               Explora las tecnologías emergentes que están revolucionando la forma en que compramos 
@@ -160,29 +160,6 @@ const Blog: React.FC = () => {
               </div>
             </article>
           ))}
-        </div>
-
-        {/* Newsletter Signup */}
-        <div className="bg-white rounded-lg shadow-md p-8 mt-12">
-          <div className="text-center">
-            <div className="text-4xl mb-4">📧</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Suscríbete a nuestro newsletter
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Recibe las últimas noticias, ofertas exclusivas y contenido de valor directamente en tu bandeja de entrada
-            </p>
-            <div className="max-w-md mx-auto flex gap-4">
-              <input
-                type="email"
-                placeholder="Tu email"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-              <button className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                Suscribirse
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

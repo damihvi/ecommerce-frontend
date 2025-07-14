@@ -14,7 +14,7 @@ const Contact: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Form */}
           <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Envíanos un mensaje</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Envía un mensaje</h2>
             <form className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -36,7 +36,7 @@ const Contact: React.FC = () => {
                   type="email"
                   id="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="tu@email.com"
+                  placeholder="ejemplo@ejemplo.com"
                 />
               </div>
               
@@ -48,7 +48,7 @@ const Contact: React.FC = () => {
                   type="tel"
                   id="phone"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="+1234567890"
+                  placeholder="1234567890"
                 />
               </div>
               
@@ -60,7 +60,7 @@ const Contact: React.FC = () => {
                   id="subject"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 >
-                  <option>Selecciona un asunto</option>
+                  <option>Seleccioneun asunto</option>
                   <option>Consulta sobre productos</option>
                   <option>Soporte técnico</option>
                   <option>Devoluciones</option>
@@ -77,7 +77,7 @@ const Contact: React.FC = () => {
                   id="message"
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  placeholder="Escribe tu mensaje aquí..."
+                  placeholder="Escriba su mensaje"
                 />
               </div>
               
@@ -99,7 +99,7 @@ const Contact: React.FC = () => {
                   <div className="text-2xl mr-4">📍</div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Dirección</h3>
-                    <p className="text-gray-600">123 Main Street, Ciudad, País 12345</p>
+                    <p className="text-gray-600">Carcelen</p>
                   </div>
                 </div>
                 
@@ -107,7 +107,7 @@ const Contact: React.FC = () => {
                   <div className="text-2xl mr-4">📞</div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Teléfono</h3>
-                    <p className="text-gray-600">+1 (555) 123-4567</p>
+                    <p className="text-gray-600">098616176</p>
                   </div>
                 </div>
                 
@@ -115,7 +115,7 @@ const Contact: React.FC = () => {
                   <div className="text-2xl mr-4">✉️</div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-600">contact@tienda.com</p>
+                    <p className="text-gray-600">dami-anherrera@hotmail.com</p>
                   </div>
                 </div>
                 
@@ -123,8 +123,8 @@ const Contact: React.FC = () => {
                   <div className="text-2xl mr-4">🕒</div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Horario de atención</h3>
-                    <p className="text-gray-600">Lunes a Viernes: 9:00 AM - 6:00 PM</p>
-                    <p className="text-gray-600">Sábados: 10:00 AM - 4:00 PM</p>
+                    <p className="text-gray-600">Lunes a Viernes: 10:00 PM - 10:30 PM</p>
+                    <p className="text-gray-600">Sábados: 1:00 PM - 1:45 PM</p>
                   </div>
                 </div>
               </div>
@@ -141,7 +141,7 @@ const Contact: React.FC = () => {
                 
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">¿Ofrecen devoluciones?</h3>
-                  <p className="text-gray-600">Sí, 30 días para devoluciones sin preguntas.</p>
+                  <p className="text-gray-600">Sí, 30 días para devoluciones.</p>
                 </div>
                 
                 <div>
