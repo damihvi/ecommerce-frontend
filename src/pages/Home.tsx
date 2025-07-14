@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { API_BASE_URL, productsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
   const [backendStatus, setBackendStatus] = useState<string>('Checking...');
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     // Test backend connection
@@ -88,6 +90,20 @@ const Home: React.FC = () => {
             {/* Backend Status */}
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 inline-block border border-white/20">
               <p className="text-white/90 font-medium">{backendStatus}</p>
+            </div>
+            
+            {/* Auth Debug Info */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mt-4 inline-block border border-white/20">
+              <div className="text-white/90 font-medium">
+                <p>🔐 Auth Status: {isAuthenticated ? '✅ Logged In' : '❌ Not Logged In'}</p>
+                {user && (
+                  <div className="mt-2 text-sm">
+                    <p>👤 User: {user.firstName} {user.lastName}</p>
+                    <p>📧 Email: {user.email}</p>
+                    <p>🏷️ Role: {user.role}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

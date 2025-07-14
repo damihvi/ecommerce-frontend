@@ -22,9 +22,15 @@ const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
+      console.log('Login attempt with:', data); // Debug log
       await login(data);
       toast.success('Login successful!');
-      navigate('/');
+      
+      // Esperar un poco para que el estado se actualice
+      setTimeout(() => {
+        navigate('/');
+      }, 100);
+      
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.response?.data?.message || 'Login failed');

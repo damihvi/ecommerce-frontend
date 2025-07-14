@@ -53,9 +53,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (token) {
           // Verify token and get user info
           const response = await apiClient.get('/auth/profile');
-          setUser(response.data);
+          console.log('Profile response:', response.data); // Debug log
+          
+          // Manejar diferentes estructuras de respuesta
+          let userData;
+          if (response.data.success) {
+            userData = response.data.data || response.data.user;
+          } else {
+            userData = response.data.user || response.data;
+          }
+          
+          if (userData) {
+            setUser(userData);
+            console.log('User profile loaded:', userData); // Debug log
+          }
         }
       } catch (error) {
+        console.error('Auth initialization error:', error);
         localStorage.removeItem('token');
       } finally {
         setLoading(false);
@@ -68,11 +82,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await apiClient.post('/auth/login', credentials);
-      const { token, user: userData } = response.data;
+      console.log('Login response:', response.data); // Debug log
       
-      localStorage.setItem('token', token);
-      setUser(userData);
+      // Manejar diferentes estructuras de respuesta
+      let token, userData;
+      
+      if (response.data.success) {
+        // Estructura: { success: true, data: { token, user } }
+        token = response.data.data?.token || response.data.data?.access_token;
+        userData = response.data.data?.user || response.data.data;
+      } else {
+        // Estructura directa: { token, user } o { access_token, user }
+        token = response.data.token || response.data.access_token;
+        userData = response.data.user || response.data;
+      }
+      
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      
+      if (userData) {
+        setUser(userData);
+      }
+      
+      console.log('User set:', userData); // Debug log
+      console.log('Token saved:', token); // Debug log
+      
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   };
