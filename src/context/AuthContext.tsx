@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiClient } from '../services/api';
+import { apiClient, authAPI } from '../services/api';
 
 // Types
 interface User {
@@ -81,7 +81,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      const response = await apiClient.post('/auth/login', credentials);
+      const response = await authAPI.login({ 
+        identifier: credentials.identifier, 
+        password: credentials.password 
+      });
       console.log('Login response:', response.data); // Debug log
       
       // Manejar diferentes estructuras de respuesta
@@ -116,7 +119,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (credentials: RegisterCredentials) => {
     try {
-      const response = await apiClient.post('/auth/register', credentials);
+      const response = await authAPI.register({
+        username: `${credentials.firstName} ${credentials.lastName}`,
+        email: credentials.email,
+        password: credentials.password
+      });
       const { token, user: userData } = response.data;
       
       localStorage.setItem('token', token);
