@@ -131,10 +131,21 @@ const AdminDashboard: React.FC = () => {
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await usersAPI.getAll();
-      console.log('Users API response:', response.data);
-      // Ensure we return an array
-      return Array.isArray(response.data) ? response.data : [];
+      try {
+        const response = await usersAPI.getAll({ page: 1, limit: 100 });
+        console.log('Users API response:', response.data);
+        
+        // Handle paginated response
+        if (response.data?.users && Array.isArray(response.data.users)) {
+          return response.data.users;
+        }
+        
+        // Handle direct array response (backward compatibility)
+        return Array.isArray(response.data) ? response.data : [];
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error; // Let React Query handle the error
+      }
     },
   });
 
@@ -252,9 +263,10 @@ const AdminDashboard: React.FC = () => {
       setIsUserModalOpen(false);
       resetUserForm();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating user:', error);
-      toast.error('Error al crear el usuario');
+      const errorMessage = error.response?.data?.message || 'Error al crear el usuario';
+      toast.error(errorMessage);
     },
   });
 
@@ -270,9 +282,10 @@ const AdminDashboard: React.FC = () => {
       setEditingUser(null);
       resetUserForm();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating user:', error);
-      toast.error('Error al actualizar el usuario');
+      const errorMessage = error.response?.data?.message || 'Error al actualizar el usuario';
+      toast.error(errorMessage);
     },
   });
 
@@ -285,9 +298,10 @@ const AdminDashboard: React.FC = () => {
       toast.success('Usuario eliminado exitosamente');
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error deleting user:', error);
-      toast.error('Error al eliminar el usuario');
+      const errorMessage = error.response?.data?.message || 'Error al eliminar el usuario';
+      toast.error(errorMessage);
     },
   });
 
@@ -300,9 +314,10 @@ const AdminDashboard: React.FC = () => {
       toast.success('Rol actualizado exitosamente');
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating user role:', error);
-      toast.error('Error al actualizar el rol');
+      const errorMessage = error.response?.data?.message || 'Error al actualizar el rol';
+      toast.error(errorMessage);
     },
   });
 

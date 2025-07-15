@@ -6,22 +6,45 @@ import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
   const [backendStatus, setBackendStatus] = useState<string>('Checking...');
-  const { isAuthenticated, user, loading } = useAuth();
-
-  console.log('Home - Auth state:', { isAuthenticated, user, loading }); // Debug log
+  const { loading } = useAuth();
 
   useEffect(() => {
     // Test backend connection
     const testBackend = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/health`);
-        if (response.ok) {
+        console.log('Testing backend connection to:', `${API_BASE_URL}/products`);
+        
+        // Use the API client that's already configured
+        const response = await productsAPI.getAll();
+        
+        console.log('Backend response:', response);
+        
+        if (response.data) {
           setBackendStatus('✅ Backend conectado exitosamente');
         } else {
-          setBackendStatus('❌ Falló la conexión al backend');
+          setBackendStatus('❌ Backend no retorna datos');
         }
       } catch (error) {
-        setBackendStatus('❌ Backend no accesible');
+        console.error('Backend connection error:', error);
+        
+        // Check the error type
+        const axiosError = error as any; // Cast to any to access axios error properties
+        
+        if (axiosError.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          if (axiosError.response.status === 401) {
+            setBackendStatus('✅ Backend conectado (requiere autenticación)');
+          } else {
+            setBackendStatus(`⚠️ Backend responde con status ${axiosError.response.status}`);
+          }
+        } else if (axiosError.request) {
+          // The request was made but no response was received
+          setBackendStatus('❌ Backend no responde - Verificar conexión');
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          setBackendStatus('❌ Error de configuración de la petición');
+        }
       }
     };
 
@@ -58,14 +81,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-light-50 to-white">
-      {/* Debug Info */}
-      <div className="bg-blue-100 p-4 border-l-4 border-blue-500 text-blue-700">
-        <h3 className="font-bold">Estado de Debug:</h3>
-        <p>Autenticado: {isAuthenticated ? 'Sí' : 'No'}</p>
-        <p>Usuario: {user ? `${user.firstName} ${user.lastName}` : 'No definido'}</p>
-        <p>Backend: {backendStatus}</p>
-      </div>
-      
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Background Animation */}
@@ -110,25 +125,10 @@ const Home: React.FC = () => {
               </Link>
             </div>
 
-            {/* Status Cards Container */}
-            <div className="space-y-4 w-full max-w-2xl mx-auto">
-              {/* Backend Status */}
+            {/* Backend Status */}
+            <div className="w-full max-w-md mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 w-full">
                 <p className="text-white/90 font-medium text-center">{backendStatus}</p>
-              </div>
-              
-              {/* Auth Debug Info */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 w-full">
-                <div className="text-white/90 font-medium text-center">
-                  <p className="mb-2">🔐 Auth Status: {isAuthenticated ? '✅ Logged In' : '❌ Not Logged In'}</p>
-                  {user && (
-                    <div className="text-sm space-y-1">
-                      <p>👤 User: {user.firstName} {user.lastName}</p>
-                      <p>📧 Email: {user.email}</p>
-                      <p>🏷️ Role: {user.role}</p>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           </div>
