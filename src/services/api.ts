@@ -53,6 +53,15 @@ export const authAPI = {
   getProfile: () => apiClient.get('/auth/session/profile'),
 };
 
+export const usersAPI = {
+  getAll: (params?: any) => apiClient.get('/users', { params }),
+  getById: (id: string) => apiClient.get(`/users/${id}`),
+  create: (userData: any) => apiClient.post('/users', userData),
+  update: (id: string, userData: any) => apiClient.put(`/users/${id}`, userData),
+  delete: (id: string) => apiClient.delete(`/users/${id}`),
+  updateRole: (id: string, role: string) => apiClient.patch(`/users/${id}/role`, { role }),
+};
+
 export const productsAPI = {
   getAll: (params?: any) => apiClient.get('/products', { params }),
   getById: (id: string) => apiClient.get(`/products/${id}`),

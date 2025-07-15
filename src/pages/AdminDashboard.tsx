@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productsAPI, categoriesAPI } from '../services/api';
+import { productsAPI, categoriesAPI, usersAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
 
@@ -26,6 +26,17 @@ interface Category {
   description?: string;
 }
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ProductFormData {
   title: string;
   description: string;
@@ -40,15 +51,26 @@ interface CategoryFormData {
   description: string;
 }
 
+interface UserFormData {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  role: string;
+}
+
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isAuthenticated, user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'stats'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users' | 'stats'>('products');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const [productFormData, setProductFormData] = useState<ProductFormData>({
     title: '',
@@ -62,6 +84,15 @@ const AdminDashboard: React.FC = () => {
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
     name: '',
     description: ''
+  });
+
+  const [userFormData, setUserFormData] = useState<UserFormData>({
+    username: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    password: '',
+    role: 'customer'
   });
 
   // Redirect if not authenticated or not admin
@@ -91,6 +122,17 @@ const AdminDashboard: React.FC = () => {
     queryFn: async () => {
       const response = await categoriesAPI.getAll();
       console.log('Categories API response:', response.data);
+      // Ensure we return an array
+      return Array.isArray(response.data) ? response.data : [];
+    },
+  });
+
+  // Fetch users
+  const { data: users, isLoading: usersLoading } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await usersAPI.getAll();
+      console.log('Users API response:', response.data);
       // Ensure we return an array
       return Array.isArray(response.data) ? response.data : [];
     },
@@ -198,6 +240,72 @@ const AdminDashboard: React.FC = () => {
     },
   });
 
+  // User mutations
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: UserFormData) => {
+      const response = await usersAPI.create(userData);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Usuario creado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setIsUserModalOpen(false);
+      resetUserForm();
+    },
+    onError: (error) => {
+      console.error('Error creating user:', error);
+      toast.error('Error al crear el usuario');
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, userData }: { id: string; userData: UserFormData }) => {
+      const response = await usersAPI.update(id, userData);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Usuario actualizado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setIsUserModalOpen(false);
+      setEditingUser(null);
+      resetUserForm();
+    },
+    onError: (error) => {
+      console.error('Error updating user:', error);
+      toast.error('Error al actualizar el usuario');
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await usersAPI.delete(id);
+      return id;
+    },
+    onSuccess: () => {
+      toast.success('Usuario eliminado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (error) => {
+      console.error('Error deleting user:', error);
+      toast.error('Error al eliminar el usuario');
+    },
+  });
+
+  const updateUserRoleMutation = useMutation({
+    mutationFn: async ({ id, role }: { id: string; role: string }) => {
+      const response = await usersAPI.updateRole(id, role);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Rol actualizado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+    onError: (error) => {
+      console.error('Error updating user role:', error);
+      toast.error('Error al actualizar el rol');
+    },
+  });
+
   // Form handlers
   const resetProductForm = () => {
     setProductFormData({
@@ -214,6 +322,17 @@ const AdminDashboard: React.FC = () => {
     setCategoryFormData({
       name: '',
       description: ''
+    });
+  };
+
+  const resetUserForm = () => {
+    setUserFormData({
+      username: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+      role: 'customer'
     });
   };
 
@@ -237,6 +356,19 @@ const AdminDashboard: React.FC = () => {
       description: category.description || ''
     });
     setIsCategoryModalOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setUserFormData({
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      password: '', // Don't pre-fill password for security
+      role: user.role
+    });
+    setIsUserModalOpen(true);
   };
 
   const handleProductSubmit = (e: React.FormEvent) => {
@@ -280,6 +412,26 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleUserSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!userFormData.username || !userFormData.email || !userFormData.firstName || !userFormData.lastName) {
+      toast.error('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    if (!editingUser && !userFormData.password) {
+      toast.error('La contraseña es requerida para nuevos usuarios');
+      return;
+    }
+
+    if (editingUser) {
+      updateUserMutation.mutate({ id: editingUser.id, userData: userFormData });
+    } else {
+      createUserMutation.mutate(userFormData);
+    }
+  };
+
   const handleDeleteProduct = (id: number) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       deleteProductMutation.mutate(id);
@@ -290,6 +442,16 @@ const AdminDashboard: React.FC = () => {
     if (window.confirm('¿Estás seguro de que quieres eliminar esta categoría?')) {
       deleteCategoryMutation.mutate(id);
     }
+  };
+
+  const handleDeleteUser = (id: string) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      deleteUserMutation.mutate(id);
+    }
+  };
+
+  const handleUpdateUserRole = (id: string, role: string) => {
+    updateUserRoleMutation.mutate({ id, role });
   };
 
   if (authLoading) {
@@ -363,6 +525,16 @@ const AdminDashboard: React.FC = () => {
               }`}
             >
               Categorías
+            </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'users'
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Usuarios
             </button>
             <button
               onClick={() => setActiveTab('stats')}
@@ -566,6 +738,130 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Users Tab */}
+        {activeTab === 'users' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Gestión de Usuarios</h2>
+              <button
+                onClick={() => {
+                  setEditingUser(null);
+                  resetUserForm();
+                  setIsUserModalOpen(true);
+                }}
+                className="btn-primary"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Nuevo Usuario
+              </button>
+            </div>
+
+            {/* Users Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Usuario
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Rol
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha de Registro
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {usersLoading ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
+                        </td>
+                      </tr>
+                    ) : !Array.isArray(users) || users.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                          No hay usuarios registrados
+                        </td>
+                      </tr>
+                    ) : (
+                      users.map((user: User) => (
+                        <tr key={user.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
+                                  <span className="text-white font-semibold text-sm">
+                                    {user.firstName.charAt(0).toUpperCase()}{user.lastName.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {user.firstName} {user.lastName}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  @{user.username}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <select
+                              value={user.role}
+                              onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                              className="text-sm border border-gray-300 rounded px-2 py-1"
+                            >
+                              <option value="customer">Customer</option>
+                              <option value="admin">Admin</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleEditUser(user)}
+                                className="text-indigo-600 hover:text-indigo-900"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(user.id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -837,6 +1133,126 @@ const AdminDashboard: React.FC = () => {
                         className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
                       >
                         {editingCategory ? 'Actualizar' : 'Crear'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Modal */}
+      {isUserModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsUserModalOpen(false)}></div>
+            
+            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+              <div className="sm:flex sm:items-start">
+                <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                    {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
+                  </h3>
+                  
+                  <form onSubmit={handleUserSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Nombre de Usuario *
+                      </label>
+                      <input
+                        type="text"
+                        value={userFormData.username}
+                        onChange={(e) => setUserFormData(prev => ({ ...prev, username: e.target.value }))}
+                        required
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        value={userFormData.email}
+                        onChange={(e) => setUserFormData(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Nombre *
+                        </label>
+                        <input
+                          type="text"
+                          value={userFormData.firstName}
+                          onChange={(e) => setUserFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                          required
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Apellido *
+                        </label>
+                        <input
+                          type="text"
+                          value={userFormData.lastName}
+                          onChange={(e) => setUserFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                          required
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Contraseña {editingUser ? '(dejar en blanco para no cambiar)' : '*'}
+                      </label>
+                      <input
+                        type="password"
+                        value={userFormData.password}
+                        onChange={(e) => setUserFormData(prev => ({ ...prev, password: e.target.value }))}
+                        required={!editingUser}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Rol *
+                      </label>
+                      <select
+                        value={userFormData.role}
+                        onChange={(e) => setUserFormData(prev => ({ ...prev, role: e.target.value }))}
+                        required
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      >
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+
+                    <div className="flex justify-end space-x-3 mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setIsUserModalOpen(false)}
+                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                        className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+                      >
+                        {editingUser ? 'Actualizar' : 'Crear'}
                       </button>
                     </div>
                   </form>
