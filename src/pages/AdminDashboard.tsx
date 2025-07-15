@@ -128,26 +128,35 @@ const AdminDashboard: React.FC = () => {
   });
 
   // Fetch users
-  const { data: users, isLoading: usersLoading } = useQuery({
+  const { data: users, isLoading: usersLoading, refetch: refetchUsers } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
       try {
+        console.log('Fetching users...');
         const response = await usersAPI.getAll({ page: 1, limit: 100 });
         console.log('Users API response:', response.data);
         
         // Handle paginated response
         if (response.data?.users && Array.isArray(response.data.users)) {
+          console.log('Found users (paginated):', response.data.users.length);
           return response.data.users;
         }
         
         // Handle direct array response (backward compatibility)
-        return Array.isArray(response.data) ? response.data : [];
+        const usersArray = Array.isArray(response.data) ? response.data : [];
+        console.log('Found users (direct):', usersArray.length);
+        return usersArray;
       } catch (error) {
         console.error('Error fetching users:', error);
         throw error; // Let React Query handle the error
       }
     },
   });
+
+  // Monitor users changes
+  React.useEffect(() => {
+    console.log('Users list updated:', users);
+  }, [users]);
 
   // Product mutations
   const createProductMutation = useMutation({
@@ -254,12 +263,19 @@ const AdminDashboard: React.FC = () => {
   // User mutations
   const createUserMutation = useMutation({
     mutationFn: async (userData: UserFormData) => {
+      console.log('Creating user with data:', userData);
       const response = await usersAPI.create(userData);
+      console.log('User created response:', response.data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (newUser) => {
+      console.log('User created successfully:', newUser);
       toast.success('Usuario creado exitosamente');
+      
+      // Invalidate and refetch users
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
+      
       setIsUserModalOpen(false);
       resetUserForm();
     },
@@ -272,12 +288,19 @@ const AdminDashboard: React.FC = () => {
 
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, userData }: { id: string; userData: UserFormData }) => {
+      console.log('Updating user:', id, 'with data:', userData);
       const response = await usersAPI.update(id, userData);
+      console.log('User updated response:', response.data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
+      console.log('User updated successfully:', updatedUser);
       toast.success('Usuario actualizado exitosamente');
+      
+      // Invalidate and refetch users
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
+      
       setIsUserModalOpen(false);
       setEditingUser(null);
       resetUserForm();
@@ -291,12 +314,17 @@ const AdminDashboard: React.FC = () => {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting user:', id);
       await usersAPI.delete(id);
       return id;
     },
-    onSuccess: () => {
+    onSuccess: (deletedId) => {
+      console.log('User deleted successfully:', deletedId);
       toast.success('Usuario eliminado exitosamente');
+      
+      // Invalidate and refetch users
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
     },
     onError: (error: any) => {
       console.error('Error deleting user:', error);
@@ -307,12 +335,18 @@ const AdminDashboard: React.FC = () => {
 
   const updateUserRoleMutation = useMutation({
     mutationFn: async ({ id, role }: { id: string; role: string }) => {
+      console.log('Updating user role:', id, 'to role:', role);
       const response = await usersAPI.updateRole(id, role);
+      console.log('User role updated response:', response.data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
+      console.log('User role updated successfully:', updatedUser);
       toast.success('Rol actualizado exitosamente');
+      
+      // Invalidate and refetch users
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
     },
     onError: (error: any) => {
       console.error('Error updating user role:', error);
@@ -430,6 +464,9 @@ const AdminDashboard: React.FC = () => {
   const handleUserSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Submitting user form with data:', userFormData);
+    console.log('Editing user:', editingUser);
+    
     if (!userFormData.username || !userFormData.email || !userFormData.firstName || !userFormData.lastName) {
       toast.error('Por favor completa todos los campos requeridos');
       return;
@@ -441,8 +478,10 @@ const AdminDashboard: React.FC = () => {
     }
 
     if (editingUser) {
+      console.log('Updating user:', editingUser.id);
       updateUserMutation.mutate({ id: editingUser.id, userData: userFormData });
     } else {
+      console.log('Creating new user');
       createUserMutation.mutate(userFormData);
     }
   };
