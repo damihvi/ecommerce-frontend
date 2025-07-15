@@ -88,8 +88,7 @@ const Blog: React.FC = () => {
               El Futuro es hoy
             </h2>
             <p className="text-xl opacity-90 mb-6">
-              Explora las tecnologías emergentes que están revolucionando la forma en que compramos 
-              y vendemos en línea, desde la inteligencia artificial hasta la realidad aumentada.
+              Articulos relacionados a un ecommerce
             </p>
             <div className="flex items-center space-x-4 mb-6">
               <span>Por María García</span>
