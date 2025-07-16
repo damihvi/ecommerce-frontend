@@ -6,10 +6,17 @@ function useProducts() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/products/public-list')
+    fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/public-list')
       .then(res => res.json())
       .then(data => {
-        setProducts(Array.isArray(data) ? data : []);
+        // data should be SuccessResponseDto
+        if (data && data.success && Array.isArray(data.data)) {
+          setProducts(data.data);
+        } else if (data && data.success && data.data && Array.isArray(data.data.items)) {
+          setProducts(data.data.items);
+        } else {
+          setProducts([]);
+        }
         setLoading(false);
       })
       .catch(() => {

@@ -6,10 +6,17 @@ function useCategories() {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/categories/public-list')
+    fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/public-list')
       .then(res => res.json())
       .then(data => {
-        setCategories(Array.isArray(data) ? data : []);
+        // data should be SuccessResponseDto
+        if (data && data.success && Array.isArray(data.data)) {
+          setCategories(data.data);
+        } else if (data && data.success && data.data && Array.isArray(data.data.items)) {
+          setCategories(data.data.items);
+        } else {
+          setCategories([]);
+        }
         setLoading(false);
       })
       .catch(() => {
