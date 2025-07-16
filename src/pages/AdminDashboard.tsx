@@ -6,6 +6,8 @@ import { productsAPI, categoriesAPI, usersAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
 import UsersList from '../components/UsersList';
+import ProductsList from '../components/ProductsList';
+import CategoriesList from '../components/CategoriesList';
 
 interface Product {
   id: number;
@@ -611,34 +613,7 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'products' && (
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900">Productos almacenados</h2>
-            {productsLoading ? (
-              <div>Cargando productos...</div>
-            ) : !Array.isArray(products) || products.length === 0 ? (
-              <div>No hay productos registrados</div>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Categoría</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product) => (
-                    <tr key={product.id}>
-                      <td>{product.title}</td>
-                      <td>{product.description}</td>
-                      <td>${product.price}</td>
-                      <td>{product.stock}</td>
-                      <td>{product.category?.name || 'Sin categoría'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <ProductsList />
           </div>
         )}
 
@@ -646,28 +621,7 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'categories' && (
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900">Categorías almacenadas</h2>
-            {categoriesLoading ? (
-              <div>Cargando categorías...</div>
-            ) : !Array.isArray(categories) || categories.length === 0 ? (
-              <div>No hay categorías registradas</div>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((category) => (
-                    <tr key={category.id}>
-                      <td>{category.name}</td>
-                      <td>{category.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <CategoriesList />
           </div>
         )}
 
