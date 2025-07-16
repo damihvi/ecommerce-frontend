@@ -65,11 +65,10 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users' | 'stats'>('products');
-  // Hooks públicos para productos y categorías
-  const { data: products = [], isLoading: productsLoading } = useProducts();
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+  // Hooks públicos simples
+  const { products, loading: productsLoading } = useProducts();
+  const { categories, loading: categoriesLoading } = useCategories();
   // El componente UsersList ya usa el hook público useUsers
-  // Redirección si no está autenticado
   React.useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       navigate('/login');
