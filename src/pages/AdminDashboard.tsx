@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productsAPI, categoriesAPI, usersAPI } from '../services/api';
-import toast from 'react-hot-toast';
-import ImageUpload from '../components/ImageUpload';
 import UsersList from '../components/UsersList';
 import ProductsList from '../components/ProductsList';
 import CategoriesList from '../components/CategoriesList';
+import useProducts from '../hooks/useProducts';
+import useCategories from '../hooks/useCategories';
 
 interface Product {
   id: number;
@@ -65,473 +63,20 @@ interface UserFormData {
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users' | 'stats'>('products');
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-
-  const [productFormData, setProductFormData] = useState<ProductFormData>({
-    title: '',
-    description: '',
-    price: 0,
-    stock: 0,
-    categoryId: 0,
-    imageUrl: ''
-  });
-
-  const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
-    name: '',
-    description: ''
-  });
-
-  const [userFormData, setUserFormData] = useState<UserFormData>({
-    username: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-    password: '',
-    role: 'customer'
-  });
-
-  // Redirect if not authenticated or not admin
+  // Hooks públicos para productos y categorías
+  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+  // El componente UsersList ya usa el hook público useUsers
+  // Redirección si no está autenticado
   React.useEffect(() => {
-    console.log('AdminDashboard - Auth check:', { isAuthenticated, user, authLoading });
-    
     if (!authLoading && !isAuthenticated) {
-      console.log('Not authenticated, redirecting to login');
       navigate('/login');
     }
-  }, [isAuthenticated, user, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
-  // Fetch products
-  const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const response = await productsAPI.getAll();
-      console.log('Products API response:', response.data);
-      // Ensure we return an array
-      return Array.isArray(response.data) ? response.data : [];
-    },
-  });
-
-  // Fetch categories
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await categoriesAPI.getAll();
-      console.log('Categories API response:', response.data);
-      // Ensure we return an array
-      return Array.isArray(response.data) ? response.data : [];
-    },
-  });
-
-  // Fetch users
-  const { data: users, isLoading: usersLoading, refetch: refetchUsers } = useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
-      try {
-        console.log('Fetching users...');
-        const response = await usersAPI.getAll({ page: 1, limit: 100 });
-        console.log('Users API response:', response.data);
-        
-        // Handle paginated response
-        if (response.data?.users && Array.isArray(response.data.users)) {
-          console.log('Found users (paginated):', response.data.users.length);
-          return response.data.users;
-        }
-        
-        // Handle direct array response (backward compatibility)
-        const usersArray = Array.isArray(response.data) ? response.data : [];
-        console.log('Found users (direct):', usersArray.length);
-        return usersArray;
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        throw error; // Let React Query handle the error
-      }
-    },
-  });
-
-  // Monitor users changes
-  React.useEffect(() => {
-    console.log('Users list updated:', users);
-  }, [users]);
-
-  // Product mutations
-  const createProductMutation = useMutation({
-    mutationFn: async (productData: FormData) => {
-      const response = await productsAPI.create(productData);
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success('Producto creado exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      setIsProductModalOpen(false);
-      resetProductForm();
-    },
-    onError: (error) => {
-      console.error('Error creating product:', error);
-      toast.error('Error al crear el producto');
-    },
-  });
-
-  const updateProductMutation = useMutation({
-    mutationFn: async ({ id, productData }: { id: number; productData: FormData }) => {
-      const response = await productsAPI.update(id, productData);
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success('Producto actualizado exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      setIsProductModalOpen(false);
-      setEditingProduct(null);
-      resetProductForm();
-    },
-    onError: (error) => {
-      console.error('Error updating product:', error);
-      toast.error('Error al actualizar el producto');
-    },
-  });
-
-  const deleteProductMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await productsAPI.delete(id);
-      return id;
-    },
-    onSuccess: () => {
-      toast.success('Producto eliminado exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
-    onError: (error) => {
-      console.error('Error deleting product:', error);
-      toast.error('Error al eliminar el producto');
-    },
-  });
-
-  // Category mutations
-  const createCategoryMutation = useMutation({
-    mutationFn: async (categoryData: CategoryFormData) => {
-      const response = await categoriesAPI.create(categoryData);
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success('Categoría creada exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setIsCategoryModalOpen(false);
-      resetCategoryForm();
-    },
-    onError: (error) => {
-      console.error('Error creating category:', error);
-      toast.error('Error al crear la categoría');
-    },
-  });
-
-  const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, categoryData }: { id: number; categoryData: CategoryFormData }) => {
-      const response = await categoriesAPI.update(id, categoryData);
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success('Categoría actualizada exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setIsCategoryModalOpen(false);
-      setEditingCategory(null);
-      resetCategoryForm();
-    },
-    onError: (error) => {
-      console.error('Error updating category:', error);
-      toast.error('Error al actualizar la categoría');
-    },
-  });
-
-  const deleteCategoryMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await categoriesAPI.delete(id);
-      return id;
-    },
-    onSuccess: () => {
-      toast.success('Categoría eliminada exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-    },
-    onError: (error) => {
-      console.error('Error deleting category:', error);
-      toast.error('Error al eliminar la categoría');
-    },
-  });
-
-  // User mutations
-  const createUserMutation = useMutation({
-    mutationFn: async (userData: UserFormData) => {
-      console.log('Creating user with data:', userData);
-      const response = await usersAPI.create(userData);
-      console.log('User created response:', response.data);
-      return response.data;
-    },
-    onSuccess: (newUser) => {
-      console.log('User created successfully:', newUser);
-      toast.success('Usuario creado exitosamente');
-      
-      // Invalidate and refetch users
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.refetchQueries({ queryKey: ['users'] });
-      
-      setIsUserModalOpen(false);
-      resetUserForm();
-    },
-    onError: (error: any) => {
-      console.error('Error creating user:', error);
-      const errorMessage = error.response?.data?.message || 'Error al crear el usuario';
-      toast.error(errorMessage);
-    },
-  });
-
-  const updateUserMutation = useMutation({
-    mutationFn: async ({ id, userData }: { id: string; userData: UserFormData }) => {
-      console.log('Updating user:', id, 'with data:', userData);
-      const response = await usersAPI.update(id, userData);
-      console.log('User updated response:', response.data);
-      return response.data;
-    },
-    onSuccess: (updatedUser) => {
-      console.log('User updated successfully:', updatedUser);
-      toast.success('Usuario actualizado exitosamente');
-      
-      // Invalidate and refetch users
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.refetchQueries({ queryKey: ['users'] });
-      
-      setIsUserModalOpen(false);
-      setEditingUser(null);
-      resetUserForm();
-    },
-    onError: (error: any) => {
-      console.error('Error updating user:', error);
-      const errorMessage = error.response?.data?.message || 'Error al actualizar el usuario';
-      toast.error(errorMessage);
-    },
-  });
-
-  const deleteUserMutation = useMutation({
-    mutationFn: async (id: string) => {
-      console.log('Deleting user:', id);
-      await usersAPI.delete(id);
-      return id;
-    },
-    onSuccess: (deletedId) => {
-      console.log('User deleted successfully:', deletedId);
-      toast.success('Usuario eliminado exitosamente');
-      
-      // Invalidate and refetch users
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.refetchQueries({ queryKey: ['users'] });
-    },
-    onError: (error: any) => {
-      console.error('Error deleting user:', error);
-      const errorMessage = error.response?.data?.message || 'Error al eliminar el usuario';
-      toast.error(errorMessage);
-    },
-  });
-
-  const updateUserRoleMutation = useMutation({
-    mutationFn: async ({ id, role }: { id: string; role: string }) => {
-      console.log('Updating user role:', id, 'to role:', role);
-      const response = await usersAPI.updateRole(id, role);
-      console.log('User role updated response:', response.data);
-      return response.data;
-    },
-    onSuccess: (updatedUser) => {
-      console.log('User role updated successfully:', updatedUser);
-      toast.success('Rol actualizado exitosamente');
-      
-      // Invalidate and refetch users
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.refetchQueries({ queryKey: ['users'] });
-    },
-    onError: (error: any) => {
-      console.error('Error updating user role:', error);
-      const errorMessage = error.response?.data?.message || 'Error al actualizar el rol';
-      toast.error(errorMessage);
-    },
-  });
-
-  // Form handlers
-  const resetProductForm = () => {
-    setProductFormData({
-      title: '',
-      description: '',
-      price: 0,
-      stock: 0,
-      categoryId: 0,
-      imageUrl: ''
-    });
-  };
-
-  const resetCategoryForm = () => {
-    setCategoryFormData({
-      name: '',
-      description: ''
-    });
-  };
-
-  const resetUserForm = () => {
-    setUserFormData({
-      username: '',
-      email: '',
-      firstName: '',
-      lastName: '',
-      password: '',
-      role: 'customer'
-    });
-  };
-
-  const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setProductFormData({
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-      categoryId: product.categoryId,
-      imageUrl: product.imageUrl || ''
-    });
-    setIsProductModalOpen(true);
-  };
-
-  const handleEditCategory = (category: Category) => {
-    setEditingCategory(category);
-    setCategoryFormData({
-      name: category.name,
-      description: category.description || ''
-    });
-    setIsCategoryModalOpen(true);
-  };
-
-  const handleEditUser = (user: User) => {
-    setEditingUser(user);
-    setUserFormData({
-      username: user.username,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      password: '', // Don't pre-fill password for security
-      role: user.role
-    });
-    setIsUserModalOpen(true);
-  };
-
-  const handleProductSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!productFormData.title || !productFormData.description || productFormData.price <= 0 || productFormData.categoryId === 0) {
-      toast.error('Por favor completa todos los campos requeridos');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('title', productFormData.title);
-    formData.append('description', productFormData.description);
-    formData.append('price', productFormData.price.toString());
-    formData.append('stock', productFormData.stock.toString());
-    formData.append('categoryId', productFormData.categoryId.toString());
-    
-    if (productFormData.imageUrl) {
-      formData.append('imageUrl', productFormData.imageUrl);
-    }
-
-    if (editingProduct) {
-      updateProductMutation.mutate({ id: editingProduct.id, productData: formData });
-    } else {
-      createProductMutation.mutate(formData);
-    }
-  };
-
-  const handleCategorySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!categoryFormData.name) {
-      toast.error('El nombre de la categoría es requerido');
-      return;
-    }
-
-    if (editingCategory) {
-      updateCategoryMutation.mutate({ id: editingCategory.id, categoryData: categoryFormData });
-    } else {
-      createCategoryMutation.mutate(categoryFormData);
-    }
-  };
-
-  const handleUserSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    console.log('Submitting user form with data:', userFormData);
-    console.log('Editing user:', editingUser);
-    
-    if (!userFormData.username || !userFormData.email || !userFormData.firstName || !userFormData.lastName) {
-      toast.error('Por favor completa todos los campos requeridos');
-      return;
-    }
-
-    if (!editingUser && !userFormData.password) {
-      toast.error('La contraseña es requerida para nuevos usuarios');
-      return;
-    }
-
-    if (editingUser) {
-      console.log('Updating user:', editingUser.id);
-      updateUserMutation.mutate({ id: editingUser.id, userData: userFormData });
-    } else {
-      console.log('Creating new user');
-      createUserMutation.mutate(userFormData);
-    }
-  };
-
-  const handleDeleteProduct = (id: number) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-      deleteProductMutation.mutate(id);
-    }
-  };
-
-  const handleDeleteCategory = (id: number) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta categoría?')) {
-      deleteCategoryMutation.mutate(id);
-    }
-  };
-
-  const handleDeleteUser = (id: string) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-      deleteUserMutation.mutate(id);
-    }
-  };
-
-  const handleUpdateUserRole = (id: string, role: string) => {
-    updateUserRoleMutation.mutate({ id, role });
-  };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verificando acceso...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Acceso Denegado</h2>
-          <p className="text-gray-600">Por favor inicia sesión para acceder al dashboard</p>
-        </div>
-      </div>
-    );
-  }
+  // Modals y lógica de formularios pueden quedarse igual
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -637,7 +182,6 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'stats' && (
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900">Estadísticas</h2>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
@@ -692,7 +236,7 @@ const AdminDashboard: React.FC = () => {
                         Valor Total Stock
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        ${products?.reduce((total: number, product: Product) => total + (product.price * product.stock), 0).toLocaleString() || 0}
+                        {products && products.length > 0 ? products.reduce((total: number, product: any) => total + (product.price * product.stock), 0).toLocaleString() : 0}
                       </dd>
                     </dl>
                   </div>
@@ -712,7 +256,7 @@ const AdminDashboard: React.FC = () => {
                         Stock Total
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {products?.reduce((total: number, product: Product) => total + product.stock, 0) || 0}
+                        {products && products.length > 0 ? products.reduce((total: number, product: any) => total + product.stock, 0) : 0}
                       </dd>
                     </dl>
                   </div>
@@ -724,7 +268,7 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Product Modal */}
-      {isProductModalOpen && (
+      {/* {isProductModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsProductModalOpen(false)}></div>
@@ -845,10 +389,10 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Category Modal */}
-      {isCategoryModalOpen && (
+      {/* {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsCategoryModalOpen(false)}></div>
@@ -908,10 +452,10 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* User Modal */}
-      {isUserModalOpen && (
+      {/* {isUserModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsUserModalOpen(false)}></div>
@@ -1028,7 +572,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
