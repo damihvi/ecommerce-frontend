@@ -103,7 +103,6 @@ const UsersList: React.FC = () => {
   };
 
   const handleUpdateUserRole = (id: string, role: string) => {
-    if (!id) return;
     updateUserRole(id, role);
   };
 

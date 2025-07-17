@@ -51,6 +51,10 @@ export default function useUsers() {
       
       if (!response.ok) {
         console.error('Error response:', response.status, response.statusText);
+        if (response.status === 403) {
+          localStorage.removeItem('token');
+          throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+        }
         throw new Error(data.message || `Error al cargar usuarios: ${response.status} ${response.statusText}`);
       }
 

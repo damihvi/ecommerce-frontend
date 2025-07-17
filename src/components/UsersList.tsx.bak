@@ -3,8 +3,33 @@ import useUsers from '../hooks/useUsers';
 import { User, UserFormData, CreateUserData, UpdateUserData } from '../types';
 
 const UsersList: React.FC = () => {
-  const {
-    users,
+                                       </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {user?.email || 'Sin correo'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <select
+                        value={user?.role || 'customer'}
+                        onChange={(e) => handleUpdateUserRole(user?.id || '', e.target.value)}
+                        disabled={isUpdatingRole}
+                        className="text-sm border border-gray-300 rounded px-2 py-1 disabled:opacity-50"
+                      ></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {user?.email || 'Sin correo'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <select
+                        value={user?.role || 'customer'}
+                        onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                        disabled={isUpdatingRole}
+                        className="text-sm border border-gray-300 rounded px-2 py-1 disabled:opacity-50"
+                      >users,
     isLoading,
     error,
     createUser,
@@ -42,12 +67,12 @@ const UsersList: React.FC = () => {
   const handleEditUser = (user: User) => {
     setEditingUser(user);
     setUserFormData({
-      username: user.username || '',
-      email: user.email || '',
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
       password: '', // Don't pre-fill password for security
-      role: user.role || 'customer'
+      role: user.role
     });
     setIsUserModalOpen(true);
   };
@@ -103,7 +128,6 @@ const UsersList: React.FC = () => {
   };
 
   const handleUpdateUserRole = (id: string, role: string) => {
-    if (!id) return;
     updateUserRole(id, role);
   };
 
@@ -128,7 +152,7 @@ const UsersList: React.FC = () => {
           <div className="ml-3">
             <h3 className="text-sm font-medium text-red-800">Error al cargar usuarios</h3>
             <p className="mt-2 text-sm text-red-700">
-              {error}
+              {error || 'Error desconocido'}
             </p>
           </div>
         </div>
@@ -188,7 +212,7 @@ const UsersList: React.FC = () => {
                 </tr>
               ) : (
                 users.map((user: User) => (
-                  <tr key={user?.id} className="hover:bg-gray-50">
+                  <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -205,17 +229,16 @@ const UsersList: React.FC = () => {
                           </div>
                           <div className="text-sm text-gray-500">
                             @{user?.username || 'usuario'}
-                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {user?.email || 'Sin correo'}
+                      {user.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
-                        value={user?.role || 'customer'}
-                        onChange={(e) => handleUpdateUserRole(user?.id || '', e.target.value)}
+                        value={user.role}
+                        onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
                         disabled={isUpdatingRole}
                         className="text-sm border border-gray-300 rounded px-2 py-1 disabled:opacity-50"
                       >
@@ -224,12 +247,12 @@ const UsersList: React.FC = () => {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                      {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => user && handleEditUser(user)}
+                          onClick={() => handleEditUser(user)}
                           disabled={isUpdating}
                           className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
                         >
@@ -238,7 +261,7 @@ const UsersList: React.FC = () => {
                           </svg>
                         </button>
                         <button
-                          onClick={() => user?.id && deleteUser(user.id)}
+                          onClick={() => deleteUser(user.id)}
                           disabled={isDeleting}
                           className="text-red-600 hover:text-red-900 disabled:opacity-50"
                         >
