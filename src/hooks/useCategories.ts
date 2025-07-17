@@ -32,14 +32,12 @@ export function useCategories() {
 
   const fetchCategories = useCallback(async (page: number = 1) => {
     try {
-      // Cancelar petición anterior si existe
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
 
-      // Crear nuevo controller para esta petición
       abortControllerRef.current = new AbortController();
-
+      
       setLoading(true);
       setError(null);
 
@@ -62,16 +60,15 @@ export function useCategories() {
       console.log('Categories API response:', data);
 
       if (!response.ok) {
-        console.error('Error response:', response.status, response.statusText);
         if (response.status === 403) {
           localStorage.removeItem('token');
           throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
         }
-        throw new Error(data.message || `Error al cargar categorías: ${response.status} ${response.statusText}`);
+        throw new Error(data.message || 'Error al cargar las categorías');
       }
 
       if (data?.success) {
-        const categoriesData = data.data?.items || data.data || [];
+        const categoriesData = Array.isArray(data.data) ? data.data : (data.data?.items || []);
         console.log('Categories data to set:', categoriesData);
         
         if (!Array.isArray(categoriesData)) {
