@@ -4,7 +4,7 @@ import useCategories from '../hooks/useCategories';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../constants/roles';
 
-export default function CategoriesList() {
+const CategoriesList: React.FC = () => {
   const { isAuthenticated, hasRole } = useAuth();
   const {
     categories,
@@ -20,9 +20,11 @@ export default function CategoriesList() {
   }
 
   if (!hasRole(UserRole.ADMIN)) {
-    return <div className="text-center p-4 bg-red-50 text-red-600">
-      No tienes permisos para acceder a esta sección.
-    </div>;
+    return (
+      <div className="text-center p-4 bg-red-50 text-red-600">
+        No tienes permisos para acceder a esta sección.
+      </div>
+    );
   }
 
   if (loading) {
@@ -52,22 +54,33 @@ export default function CategoriesList() {
 
   return (
     <div className="space-y-4">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((category) => (
-            <tr key={category.id}>
-              <td>{category.name}</td>
-              <td>{category.description}</td>
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nombre
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Descripción
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {categories.map((category) => (
+              <tr key={category.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-500">{category.description}</div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {pagination && pagination.totalPages > 1 && (
         <div className="flex justify-center space-x-2 mt-4">
           {Array.from({ length: pagination.totalPages }, (_, i) => (
@@ -87,4 +100,6 @@ export default function CategoriesList() {
       )}
     </div>
   );
-}
+};
+
+export default CategoriesList;
