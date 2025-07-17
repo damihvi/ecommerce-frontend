@@ -31,7 +31,10 @@ export function useCategories() {
       setLoading(true);
       setError(null);
 
-      const response = await categoriesAPI.getAll();
+      const response = await categoriesAPI.getAll({
+        page,
+        limit: pagination.itemsPerPage
+      });
       const { data } = response;
 
       if (data && (Array.isArray(data.items) || Array.isArray(data))) {

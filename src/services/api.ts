@@ -88,12 +88,12 @@ export const productsAPI = {
 };
 
 export const categoriesAPI = {
-  getAll: () => apiClient.get('/categories'),
+  getAll: (params?: any) => apiClient.get('/admin/categories', { params }),
   getActive: () => apiClient.get('/categories/active'),
   getById: (id: string) => apiClient.get(`/categories/${id}`),
-  create: (categoryData: { name: string; description: string }) => apiClient.post('/categories', categoryData),
-  update: (id: number, categoryData: { name: string; description: string }) => apiClient.put(`/categories/${id}`, categoryData),
-  delete: (id: number) => apiClient.delete(`/categories/${id}`),
+  create: (categoryData: { name: string; description: string }) => apiClient.post('/admin/categories', categoryData),
+  update: (id: number, categoryData: { name: string; description: string }) => apiClient.put(`/admin/categories/${id}`, categoryData),
+  delete: (id: number) => apiClient.delete(`/admin/categories/${id}`),
 };
 
 export const cartAPI = {
