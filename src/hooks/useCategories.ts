@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { API_CONFIG, API_HEADERS, ADMIN_ROUTES } from '../routes';
 
 interface Pagination {
   currentPage: number;
@@ -39,8 +40,12 @@ export function useCategories() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/public-list?page=${page}`, {
-        signal: abortControllerRef.current.signal
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.BASE}?page=${page}`, {
+        signal: abortControllerRef.current.signal,
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
       if (!response.ok) throw new Error('Error al cargar categorías');
@@ -82,10 +87,11 @@ export function useCategories() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.CREATE}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(categoryData)
       });
@@ -111,10 +117,11 @@ export function useCategories() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/${id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.UPDATE(id.toString())}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(categoryData)
       });
@@ -144,8 +151,12 @@ export function useCategories() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.DELETE(id.toString())}`, {
+        method: 'DELETE',
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
       if (!response.ok) throw new Error('Error al eliminar categoría');

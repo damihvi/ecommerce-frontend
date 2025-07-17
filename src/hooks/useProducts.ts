@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { API_CONFIG, API_HEADERS, ADMIN_ROUTES } from '../routes';
 
 interface Pagination {
   currentPage: number;
@@ -48,8 +49,12 @@ export function useProducts() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/public-list?page=${page}`, {
-        signal: abortControllerRef.current.signal
+      const response = await fetch(`${API_CONFIG.BASE_URL}/admin/products?page=${page}`, {
+        signal: abortControllerRef.current.signal,
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
       if (!response.ok) throw new Error('Error al cargar productos');
@@ -91,10 +96,11 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.PRODUCTS.CREATE}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(productData)
       });
@@ -120,10 +126,11 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/${id}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.PRODUCTS.UPDATE(id.toString())}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(productData)
       });
@@ -153,8 +160,12 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.PRODUCTS.DELETE(id.toString())}`, {
+        method: 'DELETE',
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
       if (!response.ok) throw new Error('Error al eliminar producto');
