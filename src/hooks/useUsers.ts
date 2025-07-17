@@ -31,11 +31,18 @@ export default function useUsers() {
       setIsLoading(true);
       setError(null);
 
+      console.log('Fetching users from:', `${API_CONFIG.BASE_URL}${ADMIN_ROUTES.USERS.LIST}?page=${page}`);
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
       const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.USERS.LIST}?page=${page}`, {
         signal: abortControllerRef.current.signal,
         headers: {
           ...API_HEADERS.PRIVATE,
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -43,15 +50,26 @@ export default function useUsers() {
       console.log('Users API response:', data);
       
       if (!response.ok) {
-        throw new Error(data.message || 'Error al cargar usuarios');
+        console.error('Error response:', response.status, response.statusText);
+        throw new Error(data.message || `Error al cargar usuarios: ${response.status} ${response.statusText}`);
       }
 
+      console.log('Processing response data:', data);
+      
       if (data?.success) {
         const usersData = data.data?.items || data.data || [];
+        console.log('Users data to set:', usersData);
+        
+        if (!Array.isArray(usersData)) {
+          console.error('Users data is not an array:', usersData);
+          throw new Error('Formato de datos inválido');
+        }
+        
         setUsers(usersData);
         
         // Actualizar paginación si viene del backend
         if (data.data?.meta) {
+          console.log('Pagination data:', data.data.meta);
           setPagination({
             currentPage: data.data.meta.currentPage,
             totalPages: data.data.meta.totalPages,
@@ -60,6 +78,7 @@ export default function useUsers() {
           });
         }
       } else {
+        console.error('API returned success: false:', data);
         throw new Error(data.message || 'Error desconocido');
       }
     } catch (err) {
@@ -67,10 +86,13 @@ export default function useUsers() {
         console.log('Fetch aborted');
         return;
       }
-      console.error('Error fetching users:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      console.error('Error in fetchUsers:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      console.log('Setting error message:', errorMessage);
+      setError(errorMessage);
       setUsers([]);
     } finally {
+      console.log('Finishing fetchUsers, setting isLoading to false');
       setIsLoading(false);
       abortControllerRef.current = null;
     }
