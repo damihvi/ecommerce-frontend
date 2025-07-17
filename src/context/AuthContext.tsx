@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiClient, authAPI } from '../services/api';
+import { UserRole, ROLES_KEY, TOKEN_KEY } from '../constants/roles';
 
 // Types
 interface User {
@@ -7,7 +8,7 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'ADMIN' | 'USER';
+  role: UserRole;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -32,6 +33,8 @@ interface AuthContextType {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  hasRole: (role: UserRole) => boolean;
+  userRoles: UserRole[];
 }
 
 // Context
@@ -45,19 +48,42 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(TOKEN_KEY);
+    const storedRoles = localStorage.getItem(ROLES_KEY);
     console.log('AuthProvider - Token found:', !!token); // Debug log
     
     if (token) {
       try {
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        // Aquí podrías hacer una validación del token si es necesario
-        console.log('AuthProvider - Token set in headers'); // Debug log
+        if (storedRoles) {
+          const roles = JSON.parse(storedRoles);
+          setUserRoles(roles);
+          apiClient.defaults.headers.common['X-User-Roles'] = storedRoles;
+        }
+        
+        // Validar el token obteniendo el perfil del usuario
+        authAPI.getProfile()
+          .then(response => {
+            const userData = response.data;
+            setUser(userData);
+            const roles = [userData.role];
+            setUserRoles(roles);
+            localStorage.setItem(ROLES_KEY, JSON.stringify(roles));
+            apiClient.defaults.headers.common['X-User-Roles'] = JSON.stringify(roles);
+          })
+          .catch(() => {
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(ROLES_KEY);
+            delete apiClient.defaults.headers.common['Authorization'];
+            delete apiClient.defaults.headers.common['X-User-Roles'];
+          });
       } catch (error) {
         console.error('AuthProvider - Error setting token:', error);
-        localStorage.removeItem('token');
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(ROLES_KEY);
       }
     }
     
@@ -88,14 +114,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       if (token) {
-        localStorage.setItem('token', token);
+        localStorage.setItem(TOKEN_KEY, token);
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         console.log('AuthProvider - Token saved and set'); // Debug log
       }
       
       if (userData) {
         setUser(userData);
-        console.log('AuthProvider - User set:', userData); // Debug log
+        const roles = [userData.role];
+        setUserRoles(roles);
+        localStorage.setItem(ROLES_KEY, JSON.stringify(roles));
+        apiClient.defaults.headers.common['X-User-Roles'] = JSON.stringify(roles);
+        console.log('AuthProvider - User and roles set:', userData, roles); // Debug log
       }
       
       console.log('User set:', userData); // Debug log
@@ -128,6 +158,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  const hasRole = (role: UserRole): boolean => {
+    return userRoles.includes(role);
+  };
+
   const value = {
     user,
     loading,
@@ -135,6 +169,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     isAuthenticated: !!user,
+    hasRole,
+    userRoles
   };
 
   return (

@@ -18,9 +18,16 @@ apiClient.interceptors.request.use(
   (config) => {
     // Add authorization token if available
     const token = localStorage.getItem('token');
+    const roles = localStorage.getItem('user_roles');
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    if (roles) {
+      config.headers['X-User-Roles'] = roles;
+    }
+    
     return config;
   },
   (error) => {
