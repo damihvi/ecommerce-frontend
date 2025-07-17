@@ -1,31 +1,214 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
-function useProducts() {
-  const [products, setProducts] = useState<any[]>([]);
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
+interface Product {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  stock: number;
+  categoryId: number;
+  imageUrl?: string;
+  category?: {
+    id: number;
+    name: string;
+  };
+  active?: boolean;
+  featured?: boolean;
+}
+
+export function useProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<Pagination>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  });
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    setLoading(true);
-    fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/public-list')
-      .then(res => res.json())
-      .then(data => {
-        // data should be SuccessResponseDto
-        if (data && data.success && Array.isArray(data.data)) {
-          setProducts(data.data);
-        } else if (data && data.success && data.data && Array.isArray(data.data.items)) {
-          setProducts(data.data.items);
-        } else {
-          setProducts([]);
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setProducts([]);
-        setLoading(false);
+  const fetchProducts = useCallback(async (page: number = 1) => {
+    try {
+      // Cancelar petición anterior si existe
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Crear nuevo controller para esta petición
+      abortControllerRef.current = new AbortController();
+
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/public-list?page=${page}`, {
+        signal: abortControllerRef.current.signal
       });
+      
+      if (!response.ok) throw new Error('Error al cargar productos');
+      
+      const data = await response.json();
+      console.log('Products API response:', data);
+
+      if (data?.success) {
+        const productsData = data.data?.items || data.data || [];
+        setProducts(productsData);
+        
+        // Actualizar paginación si viene del backend
+        if (data.data?.meta) {
+          setPagination({
+            currentPage: data.data.meta.currentPage,
+            totalPages: data.data.meta.totalPages,
+            totalItems: data.data.meta.totalItems,
+            itemsPerPage: data.data.meta.itemsPerPage
+          });
+        }
+      } else {
+        throw new Error(data.message || 'Error desconocido');
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('Fetch aborted');
+        return;
+      }
+      console.error('Error fetching products:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+      abortControllerRef.current = null;
+    }
   }, []);
 
-  return { products, loading };
+  const createProduct = useCallback(async (productData: Omit<Product, 'id'>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData)
+      });
+      
+      if (!response.ok) throw new Error('Error al crear producto');
+      
+      const data = await response.json();
+      if (data?.success) {
+        // Refetch para actualizar lista
+        await fetchProducts(pagination.currentPage);
+      } else {
+        throw new Error(data.message || 'Error al crear producto');
+      }
+    } catch (err) {
+      console.error('Error creating product:', err);
+      setError(err instanceof Error ? err.message : 'Error al crear producto');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchProducts, pagination.currentPage]);
+
+  const updateProduct = useCallback(async (id: number, productData: Partial<Product>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData)
+      });
+      
+      if (!response.ok) throw new Error('Error al actualizar producto');
+      
+      const data = await response.json();
+      if (data?.success) {
+        // Refetch para actualizar lista
+        await fetchProducts(pagination.currentPage);
+      } else {
+        throw new Error(data.message || 'Error al actualizar producto');
+      }
+    } catch (err) {
+      console.error('Error updating product:', err);
+      setError(err instanceof Error ? err.message : 'Error al actualizar producto');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchProducts, pagination.currentPage]);
+
+  const deleteProduct = useCallback(async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/products/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) throw new Error('Error al eliminar producto');
+      
+      const data = await response.json();
+      if (data?.success) {
+        // Refetch para actualizar lista
+        await fetchProducts(pagination.currentPage);
+      } else {
+        throw new Error(data.message || 'Error al eliminar producto');
+      }
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      setError(err instanceof Error ? err.message : 'Error al eliminar producto');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchProducts, pagination.currentPage]);
+
+  const toggleProductActive = useCallback(async (id: number, active: boolean) => {
+    await updateProduct(id, { active });
+  }, [updateProduct]);
+
+  const toggleProductFeatured = useCallback(async (id: number, featured: boolean) => {
+    await updateProduct(id, { featured });
+  }, [updateProduct]);
+
+  const goToPage = useCallback((page: number) => {
+    fetchProducts(page);
+  }, [fetchProducts]);
+
+  // Cargar productos al montar el componente
+  useEffect(() => {
+    fetchProducts(1);
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchProducts]);
+
+  return {
+    products,
+    loading,
+    error,
+    pagination,
+    fetchProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    toggleProductActive,
+    toggleProductFeatured,
+    goToPage
+  };
 }
 
 export default useProducts;

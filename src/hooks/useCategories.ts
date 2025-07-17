@@ -1,31 +1,200 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
-function useCategories() {
-  const [categories, setCategories] = useState<any[]>([]);
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  active?: boolean;
+}
+
+export function useCategories() {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<Pagination>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  });
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    setLoading(true);
-    fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/public-list')
-      .then(res => res.json())
-      .then(data => {
-        // data should be SuccessResponseDto
-        if (data && data.success && Array.isArray(data.data)) {
-          setCategories(data.data);
-        } else if (data && data.success && data.data && Array.isArray(data.data.items)) {
-          setCategories(data.data.items);
-        } else {
-          setCategories([]);
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setCategories([]);
-        setLoading(false);
+  const fetchCategories = useCallback(async (page: number = 1) => {
+    try {
+      // Cancelar petición anterior si existe
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Crear nuevo controller para esta petición
+      abortControllerRef.current = new AbortController();
+
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/public-list?page=${page}`, {
+        signal: abortControllerRef.current.signal
       });
+      
+      if (!response.ok) throw new Error('Error al cargar categorías');
+      
+      const data = await response.json();
+      console.log('Categories API response:', data);
+
+      if (data?.success) {
+        const categoriesData = data.data?.items || data.data || [];
+        setCategories(categoriesData);
+        
+        // Actualizar paginación si viene del backend
+        if (data.data?.meta) {
+          setPagination({
+            currentPage: data.data.meta.currentPage,
+            totalPages: data.data.meta.totalPages,
+            totalItems: data.data.meta.totalItems,
+            itemsPerPage: data.data.meta.itemsPerPage
+          });
+        }
+      } else {
+        throw new Error(data.message || 'Error desconocido');
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('Fetch aborted');
+        return;
+      }
+      console.error('Error fetching categories:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setCategories([]);
+    } finally {
+      setLoading(false);
+      abortControllerRef.current = null;
+    }
   }, []);
 
-  return { categories, loading };
+  const createCategory = useCallback(async (categoryData: Omit<Category, 'id'>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData)
+      });
+      
+      if (!response.ok) throw new Error('Error al crear categoría');
+      
+      const data = await response.json();
+      if (data?.success) {
+        // Refetch para actualizar lista
+        await fetchCategories(pagination.currentPage);
+      } else {
+        throw new Error(data.message || 'Error al crear categoría');
+      }
+    } catch (err) {
+      console.error('Error creating category:', err);
+      setError(err instanceof Error ? err.message : 'Error al crear categoría');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchCategories, pagination.currentPage]);
+
+  const updateCategory = useCallback(async (id: number, categoryData: Partial<Category>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData)
+      });
+      
+      if (!response.ok) throw new Error('Error al actualizar categoría');
+      
+      const data = await response.json();
+      if (data?.success) {
+        // Refetch para actualizar lista
+        await fetchCategories(pagination.currentPage);
+      } else {
+        throw new Error(data.message || 'Error al actualizar categoría');
+      }
+    } catch (err) {
+      console.error('Error updating category:', err);
+      setError(err instanceof Error ? err.message : 'Error al actualizar categoría');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchCategories, pagination.currentPage]);
+
+  const deleteCategory = useCallback(async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta categoría?')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api/categories/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) throw new Error('Error al eliminar categoría');
+      
+      const data = await response.json();
+      if (data?.success) {
+        // Refetch para actualizar lista
+        await fetchCategories(pagination.currentPage);
+      } else {
+        throw new Error(data.message || 'Error al eliminar categoría');
+      }
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      setError(err instanceof Error ? err.message : 'Error al eliminar categoría');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchCategories, pagination.currentPage]);
+
+  const toggleCategoryActive = useCallback(async (id: number, active: boolean) => {
+    await updateCategory(id, { active });
+  }, [updateCategory]);
+
+  const goToPage = useCallback((page: number) => {
+    fetchCategories(page);
+  }, [fetchCategories]);
+
+  // Cargar categorías al montar el componente
+  useEffect(() => {
+    fetchCategories(1);
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchCategories]);
+
+  return {
+    categories,
+    loading,
+    error,
+    pagination,
+    fetchCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    toggleCategoryActive,
+    goToPage
+  };
 }
 
 export default useCategories;
