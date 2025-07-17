@@ -7,9 +7,10 @@ export const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-sof
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  withCredentials: true, // Importante para CORS
+  withCredentials: false, // Cambiado a false para evitar problemas de CORS
   headers: {
     'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
   },
 });
 
