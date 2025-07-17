@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { API_CONFIG, API_HEADERS, ADMIN_ROUTES } from '../routes';
 import { User, UserFormData, Pagination } from '../types';
 
-export function useUsers() {
+const useUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -211,6 +211,6 @@ export function useUsers() {
     isDeleting,
     isUpdatingRole
   };
-}
+};
 
-export default useUsers;
+export { useUsers };
