@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { categoriesAPI } from '../services/api';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { API_CONFIG, API_HEADERS, ADMIN_ROUTES } from '../routes';
 
 interface Pagination {
   currentPage: number;
@@ -19,26 +19,66 @@ export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
     itemsPerPage: 10
   });
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchCategories = useCallback(async (page: number = 1) => {
     try {
+      // Cancelar petición anterior si existe
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Crear nuevo controller para esta petición
+      abortControllerRef.current = new AbortController();
+
       setLoading(true);
       setError(null);
 
-      const response = await categoriesAPI.getAll({
-        page,
-        limit: pagination.itemsPerPage
-      });
-      const { data } = response;
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
 
-      if (data && (Array.isArray(data.items) || Array.isArray(data))) {
-        const categoriesData = data.items || data;
+      console.log('Fetching categories from:', `${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.BASE}?page=${page}`);
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.BASE}?page=${page}`, {
+        signal: abortControllerRef.current.signal,
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      console.log('Categories API response:', data);
+
+      if (!response.ok) {
+        console.error('Error response:', response.status, response.statusText);
+        if (response.status === 403) {
+          localStorage.removeItem('token');
+          throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+        }
+        throw new Error(data.message || `Error al cargar categorías: ${response.status} ${response.statusText}`);
+      }
+
+      if (data?.success) {
+        const categoriesData = data.data?.items || data.data || [];
+        console.log('Categories data to set:', categoriesData);
+        
+        if (!Array.isArray(categoriesData)) {
+          console.error('Categories data is not an array:', categoriesData);
+          throw new Error('Formato de datos inválido');
+        }
+        
         setCategories(categoriesData);
         
         if (data.meta) {
@@ -64,9 +104,30 @@ export function useCategories() {
 
   const createCategory = useCallback(async (categoryData: { name: string; description: string }) => {
     try {
-      setLoading(true);
+      setIsCreating(true);
       setError(null);
-      await categoriesAPI.create(categoryData);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.CREATE}`, {
+        method: 'POST',
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(categoryData)
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Error response:', response.status, response.statusText);
+        throw new Error(data.message || 'Error al crear la categoría');
+      }
+
       await fetchCategories(pagination.currentPage);
       return true;
     } catch (err) {
@@ -74,15 +135,36 @@ export function useCategories() {
       setError(err instanceof Error ? err.message : 'Error al crear la categoría');
       return false;
     } finally {
-      setLoading(false);
+      setIsCreating(false);
     }
   }, [fetchCategories, pagination.currentPage]);
 
   const updateCategory = useCallback(async (id: number, categoryData: { name: string; description: string }) => {
     try {
-      setLoading(true);
+      setIsUpdating(true);
       setError(null);
-      await categoriesAPI.update(id, categoryData);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.UPDATE(id.toString())}`, {
+        method: 'PUT',
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(categoryData)
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Error response:', response.status, response.statusText);
+        throw new Error(data.message || 'Error al actualizar la categoría');
+      }
+
       await fetchCategories(pagination.currentPage);
       return true;
     } catch (err) {
@@ -90,22 +172,41 @@ export function useCategories() {
       setError(err instanceof Error ? err.message : 'Error al actualizar la categoría');
       return false;
     } finally {
-      setLoading(false);
+      setIsUpdating(false);
     }
   }, [fetchCategories, pagination.currentPage]);
 
   const deleteCategory = useCallback(async (id: number) => {
     try {
-      setLoading(true);
+      setIsDeleting(true);
       setError(null);
       
       // Mostrar confirmación antes de eliminar
       if (!window.confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
-        setLoading(false);
+        setIsDeleting(false);
         return false;
       }
 
-      await categoriesAPI.delete(id);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.DELETE(id.toString())}`, {
+        method: 'DELETE',
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Error response:', response.status, response.statusText);
+        throw new Error(data.message || 'Error al eliminar la categoría');
+      }
+
       await fetchCategories(pagination.currentPage);
       return true;
     } catch (err) {
@@ -113,7 +214,7 @@ export function useCategories() {
       setError(err instanceof Error ? err.message : 'Error al eliminar la categoría');
       return false;
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   }, [fetchCategories, pagination.currentPage]);
 
@@ -129,6 +230,9 @@ export function useCategories() {
     categories,
     loading,
     error,
+    isCreating,
+    isUpdating,
+    isDeleting,
     pagination,
     fetchCategories,
     createCategory,
