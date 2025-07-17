@@ -39,10 +39,12 @@ export default function useUsers() {
         }
       });
       
-      if (!response.ok) throw new Error('Error al cargar usuarios');
-      
       const data = await response.json();
       console.log('Users API response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al cargar usuarios');
+      }
 
       if (data?.success) {
         const usersData = data.data?.items || data.data || [];
@@ -87,9 +89,11 @@ export default function useUsers() {
         body: JSON.stringify(userData)
       });
       
-      if (!response.ok) throw new Error('Error al crear usuario');
-      
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al crear usuario');
+      }
       if (data?.success) {
         // Refetch para actualizar lista
         await fetchUsers(pagination.currentPage);
@@ -117,9 +121,11 @@ export default function useUsers() {
         body: JSON.stringify(userData)
       });
       
-      if (!response.ok) throw new Error('Error al actualizar usuario');
-      
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al actualizar usuario');
+      }
       if (data?.success) {
         // Refetch para actualizar lista
         await fetchUsers(pagination.currentPage);
@@ -150,9 +156,11 @@ export default function useUsers() {
         }
       });
       
-      if (!response.ok) throw new Error('Error al eliminar usuario');
-      
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al eliminar usuario');
+      }
       if (data?.success) {
         // Refetch para actualizar lista
         await fetchUsers(pagination.currentPage);
