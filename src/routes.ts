@@ -61,6 +61,7 @@ export const ADMIN_ROUTES = {
     UPDATE: (id: string) => `/admin/users/${id}`,
     DELETE: (id: string) => `/admin/users/${id}`,
     TOGGLE: (id: string) => `/admin/users/${id}/toggle-active`,
+    UPDATE_ROLE: (id: string) => `/admin/users/${id}/role`,
   },
   DASHBOARD: {
     STATS: '/admin/dashboard/stats',

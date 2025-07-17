@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useUsers, User, UserFormData } from '../hooks/useUsers';
+import { useUsers } from '../hooks/useUsers';
+import { User, UserFormData, CreateUserData, UpdateUserData } from '../types';
 
 const UsersList: React.FC = () => {
   const {
@@ -51,11 +52,8 @@ const UsersList: React.FC = () => {
     setIsUserModalOpen(true);
   };
 
-  const handleUserSubmit = (e: React.FormEvent) => {
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    console.log('Submitting user form with data:', userFormData);
-    console.log('Editing user:', editingUser);
     
     if (!userFormData.username || !userFormData.email || !userFormData.firstName || !userFormData.lastName) {
       alert('Por favor completa todos los campos requeridos');
@@ -67,17 +65,41 @@ const UsersList: React.FC = () => {
       return;
     }
 
-    if (editingUser) {
-      console.log('Updating user:', editingUser.id);
-      updateUser(editingUser.id, userFormData);
-    } else {
-      console.log('Creating new user');
-      createUser(userFormData);
+    try {
+      if (editingUser) {
+        const updateData: UpdateUserData = {
+          username: userFormData.username,
+          email: userFormData.email,
+          firstName: userFormData.firstName,
+          lastName: userFormData.lastName,
+          role: userFormData.role
+        };
+        
+        if (userFormData.password) {
+          updateData.password = userFormData.password;
+        }
+        
+        await updateUser(editingUser.id, updateData);
+      } else {
+        const createData: CreateUserData = {
+          username: userFormData.username,
+          email: userFormData.email,
+          firstName: userFormData.firstName,
+          lastName: userFormData.lastName,
+          password: userFormData.password,
+          role: userFormData.role,
+          active: true
+        };
+        
+        await createUser(createData);
+      }
+      
+      setIsUserModalOpen(false);
+      setEditingUser(null);
+      resetUserForm();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al procesar la solicitud');
     }
-
-    setIsUserModalOpen(false);
-    setEditingUser(null);
-    resetUserForm();
   };
 
   const handleUpdateUserRole = (id: string, role: string) => {
@@ -105,7 +127,7 @@ const UsersList: React.FC = () => {
           <div className="ml-3">
             <h3 className="text-sm font-medium text-red-800">Error al cargar usuarios</h3>
             <p className="mt-2 text-sm text-red-700">
-              {error instanceof Error ? error.message : 'Error desconocido'}
+              {error || 'Error desconocido'}
             </p>
           </div>
         </div>
