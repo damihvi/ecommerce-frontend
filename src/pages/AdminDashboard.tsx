@@ -6,6 +6,10 @@ import ProductsList from '../components/ProductsList';
 import CategoriesList from '../components/CategoriesList';
 import useProducts from '../hooks/useProducts';
 import useCategories from '../hooks/useCategories';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { productsAPI, categoriesAPI } from '../services/api';
+import toast from 'react-hot-toast';
+import ImageUpload from '../components/ImageUpload';
 
 interface Product {
   id: number;
@@ -65,10 +69,126 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users' | 'stats'>('products');
-  // Hooks públicos simples
+  
+  // Estados para modales
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  
+  // Estados para edición
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  
+  // Estados para formularios
+  const [productFormData, setProductFormData] = useState<ProductFormData>({
+    title: '',
+    description: '',
+    price: 0,
+    stock: 0,
+    categoryId: 0,
+  });
+  
+  const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
+    name: '',
+    description: '',
+  });
+  
+  const [userFormData, setUserFormData] = useState<UserFormData>({
+    username: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    password: '',
+    role: 'customer',
+  });
+  
+  // Query hooks
+  const queryClient = useQueryClient();
   const { products, loading: productsLoading } = useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
-  // El componente UsersList ya usa el hook público useUsers
+  
+  // Mutations
+  const createProductMutation = useMutation({
+    mutationFn: (data: FormData) => productsAPI.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setIsProductModalOpen(false);
+      toast.success('Producto creado exitosamente');
+    },
+  });
+  
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: FormData }) => productsAPI.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setIsProductModalOpen(false);
+      setEditingProduct(null);
+      toast.success('Producto actualizado exitosamente');
+    },
+  });
+  
+  const createCategoryMutation = useMutation({
+    mutationFn: (data: CategoryFormData) => categoriesAPI.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setIsCategoryModalOpen(false);
+      toast.success('Categoría creada exitosamente');
+    },
+  });
+  
+  const updateCategoryMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: CategoryFormData }) => 
+      categoriesAPI.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setIsCategoryModalOpen(false);
+      setEditingCategory(null);
+      toast.success('Categoría actualizada exitosamente');
+    },
+  });
+  // Manejadores de formularios
+  const handleProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    Object.entries(productFormData).forEach(([key, value]) => {
+      if (value !== undefined) {
+        formData.append(key, value.toString());
+      }
+    });
+
+    try {
+      if (editingProduct) {
+        await updateProductMutation.mutateAsync({ id: editingProduct.id, data: formData });
+      } else {
+        await createProductMutation.mutateAsync(formData);
+      }
+    } catch (error) {
+      console.error('Error al guardar producto:', error);
+      toast.error('Error al guardar el producto');
+    }
+  };
+
+  const handleCategorySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (editingCategory) {
+        await updateCategoryMutation.mutateAsync({ 
+          id: editingCategory.id, 
+          data: categoryFormData 
+        });
+      } else {
+        await createCategoryMutation.mutateAsync(categoryFormData);
+      }
+    } catch (error) {
+      console.error('Error al guardar categoría:', error);
+      toast.error('Error al guardar la categoría');
+    }
+  };
+
+  // Redirigir si no está autenticado
   React.useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       navigate('/login');
@@ -388,10 +508,10 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      )} */}
+      )}
 
       {/* Category Modal */}
-      {/* {isCategoryModalOpen && (
+      {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsCategoryModalOpen(false)}></div>
@@ -451,7 +571,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      )} */}
+      )} 
 
       {/* User Modal */}
       {/* {isUserModalOpen && (
