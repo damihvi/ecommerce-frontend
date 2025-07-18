@@ -113,17 +113,17 @@ export const usersAPI = {
 };
 
 export const productsAPI = {
-  getAll: (params?: any) => apiClient.get('/products', { params }),
-  getById: (id: string) => apiClient.get(`/products/${id}`),
+  getAll: (params?: any) => apiClient.get('/admin/products', { params }),
+  getById: (id: string) => apiClient.get(`/admin/products/${id}`),
   getFeatured: () => apiClient.get('/products/featured'),
   getByCategory: (categoryId: string) => apiClient.get(`/products/category/${categoryId}`),
-  create: (productData: FormData) => apiClient.post('/products', productData, {
+  create: (productData: FormData) => apiClient.post('/admin/products', productData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  update: (id: number, productData: FormData) => apiClient.put(`/products/${id}`, productData, {
+  update: (id: number, productData: FormData) => apiClient.put(`/admin/products/${id}`, productData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  delete: (id: number) => apiClient.delete(`/products/${id}`),
+  delete: (id: number) => apiClient.delete(`/admin/products/${id}`),
   uploadImage: (productId: string, imageFile: FormData) => 
     apiClient.post(`/products/${productId}/image`, imageFile, {
       headers: { 'Content-Type': 'multipart/form-data' }
@@ -134,12 +134,12 @@ export const productsAPI = {
 };
 
 export const categoriesAPI = {
-  getAll: (params?: any) => apiClient.get('/admin/categories', { params }),
+  getAll: (params?: any) => apiClient.get('/categories', { params }),
   getActive: () => apiClient.get('/categories/active'),
   getById: (id: string) => apiClient.get(`/categories/${id}`),
-  create: (categoryData: { name: string; description: string }) => apiClient.post('/admin/categories', categoryData),
-  update: (id: number, categoryData: { name: string; description: string }) => apiClient.put(`/admin/categories/${id}`, categoryData),
-  delete: (id: number) => apiClient.delete(`/admin/categories/${id}`),
+  create: (categoryData: { name: string; description: string }) => apiClient.post('/categories', categoryData),
+  update: (id: number, categoryData: { name: string; description: string }) => apiClient.put(`/categories/${id}`, categoryData),
+  delete: (id: number) => apiClient.delete(`/categories/${id}`),
 };
 
 export const cartAPI = {
