@@ -44,7 +44,20 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error); // Debug
+    console.error('Request interceptor error:', {
+      message: error.message,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+        withCredentials: error.config?.withCredentials
+      },
+      response: error.response ? {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: error.response.data
+      } : null
+    });
     return Promise.reject(error);
   }
 );
