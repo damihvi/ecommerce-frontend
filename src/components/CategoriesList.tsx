@@ -2,7 +2,6 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import useCategories from '../hooks/useCategories';
 import { useAuth } from '../context/AuthContext';
-import { UserRole } from '../constants/roles';
 
 const CategoriesList: React.FC = () => {
   const { isAuthenticated, hasRole } = useAuth();
@@ -19,7 +18,7 @@ const CategoriesList: React.FC = () => {
     return <Navigate to="/login" />;
   }
 
-  if (!hasRole(UserRole.ADMIN)) {
+  if (!hasRole('admin')) {
     return (
       <div className="text-center p-4 bg-red-50 text-red-600">
         No tienes permisos para acceder a esta sección.

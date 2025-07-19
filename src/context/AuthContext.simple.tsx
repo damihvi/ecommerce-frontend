@@ -30,7 +30,6 @@ interface AuthContextType {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
-  hasRole: (role: string) => boolean;
 }
 
 // Context
@@ -113,10 +112,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
-  const hasRole = (role: string): boolean => {
-    return user?.role === role || user?.role === 'admin';
-  };
-
   const value: AuthContextType = {
     user,
     loading,
@@ -124,7 +119,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     isAuthenticated: !!user,
-    hasRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
