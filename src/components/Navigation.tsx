@@ -136,13 +136,28 @@ const Navigation: React.FC = () => {
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">
-                      {user?.firstName?.charAt(0).toUpperCase() || 'U'}
+                      {user?.firstName?.charAt(0).toUpperCase() || 
+                       user?.name?.charAt(0).toUpperCase() || 
+                       user?.email?.charAt(0).toUpperCase() || 'U'}
                     </span>
                   </div>
-                  <span className="font-medium text-sm hidden xl:inline">
-                    {user?.firstName || 'Usuario'}
-                  </span>
+                  <div className="hidden xl:block">
+                    <span className="font-medium text-sm">
+                      {user?.firstName || user?.name?.split(' ')[0] || 'Usuario'}
+                    </span>
+                    {user?.role === 'admin' && (
+                      <div className="text-xs text-purple-600 font-medium">Admin</div>
+                    )}
+                  </div>
                 </Link>
+                {user?.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    className="px-3 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all duration-200 font-medium text-sm"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 bg-gradient-to-r from-dark-500 to-dark-600 text-white rounded-xl hover:from-dark-600 hover:to-dark-700 transition-all duration-200 font-medium text-sm"
@@ -189,8 +204,18 @@ const Navigation: React.FC = () => {
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">
-                      {user?.firstName?.charAt(0).toUpperCase() || 'U'}
+                      {user?.firstName?.charAt(0).toUpperCase() || 
+                       user?.name?.charAt(0).toUpperCase() || 
+                       user?.email?.charAt(0).toUpperCase() || 'U'}
                     </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-gray-900">
+                      {user?.firstName || user?.name?.split(' ')[0] || 'Usuario'}
+                    </span>
+                    {user?.role === 'admin' && (
+                      <span className="text-xs text-purple-600 font-medium">Admin</span>
+                    )}
                   </div>
                 </Link>
                 <button
