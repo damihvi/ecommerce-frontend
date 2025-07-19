@@ -1,12 +1,13 @@
 import axios from 'axios';
+import { config } from '../config';
 
-// API base URL - Production VPS
-export const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api';
+// API base URL - Use environment variable or fallback to Render URL
+export const API_BASE_URL = config.API_BASE_URL;
 
 // Create axios instance
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: config.API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json'
   },

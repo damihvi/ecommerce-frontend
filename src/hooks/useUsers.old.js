@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Configuración de la API
-const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api';
+import { useState, useEffect, useCallback } from 'react';
+
+// Import API_BASE_URL from the central api configuration
+import { API_BASE_URL } from '../services/api';
 
 // Hook personalizado para manejar usuarios
 export const useUsers = () => {
