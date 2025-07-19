@@ -12,21 +12,21 @@ import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
 
 interface Product {
-  id: number;
+  id: string;
   title: string;
   description: string;
   price: number;
   stock: number;
-  categoryId: number;
+  categoryId: string;
   imageUrl?: string;
   category?: {
-    id: number;
+    id: string;
     name: string;
   };
 }
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
   description?: string;
 }
@@ -47,7 +47,7 @@ interface ProductFormData {
   description: string;
   price: number;
   stock: number;
-  categoryId: number;
+  categoryId: string;
   imageUrl?: string;
 }
 
@@ -86,7 +86,7 @@ const AdminDashboard: React.FC = () => {
     description: '',
     price: 0,
     stock: 0,
-    categoryId: 0,
+    categoryId: '',
   });
   
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
@@ -119,7 +119,7 @@ const AdminDashboard: React.FC = () => {
   });
   
   const updateProductMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: FormData }) => productsAPI.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: FormData }) => productsAPI.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setIsProductModalOpen(false);
@@ -138,7 +138,7 @@ const AdminDashboard: React.FC = () => {
   });
   
   const updateCategoryMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: CategoryFormData }) => 
+    mutationFn: ({ id, data }: { id: string; data: CategoryFormData }) => 
       categoriesAPI.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -462,11 +462,11 @@ const AdminDashboard: React.FC = () => {
                       </label>
                       <select
                         value={productFormData.categoryId}
-                        onChange={(e) => setProductFormData(prev => ({ ...prev, categoryId: Number(e.target.value) }))}
+                        onChange={(e) => setProductFormData(prev => ({ ...prev, categoryId: e.target.value }))}
                         required
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       >
-                        <option value={0}>Selecciona una categoría</option>
+                        <option value="">Selecciona una categoría</option>
                         {Array.isArray(categories) && categories.map((category: Category) => (
                           <option key={category.id} value={category.id}>
                             {category.name}

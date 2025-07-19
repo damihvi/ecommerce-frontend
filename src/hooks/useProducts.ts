@@ -9,15 +9,15 @@ interface Pagination {
 }
 
 interface Product {
-  id: number;
+  id: string;
   title: string;
   description: string;
   price: number;
   stock: number;
-  categoryId: number;
+  categoryId: string;
   imageUrl?: string;
   category?: {
-    id: number;
+    id: string;
     name: string;
   };
   active?: boolean;

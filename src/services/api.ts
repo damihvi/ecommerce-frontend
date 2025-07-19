@@ -58,8 +58,10 @@ export const usersAPI = {
 };
 
 export const productsAPI = {
-  getAll: () => apiClient.get('/products'),
+  getAll: (params?: any) => apiClient.get('/products', { params }),
   getById: (id: string) => apiClient.get(`/products/${id}`),
+  getFeatured: () => apiClient.get('/products'),
+  getImageUrl: (imagePath: string) => `${API_BASE_URL}/uploads/${imagePath}`,
   create: (productData: any) => apiClient.post('/products', productData),
   update: (id: string, productData: any) => apiClient.put(`/products/${id}`, productData),
   delete: (id: string) => apiClient.delete(`/products/${id}`),
@@ -67,6 +69,7 @@ export const productsAPI = {
 
 export const categoriesAPI = {
   getAll: () => apiClient.get('/categories'),
+  getActive: () => apiClient.get('/categories'),
   getById: (id: string) => apiClient.get(`/categories/${id}`),
   create: (categoryData: { name: string; description: string }) => apiClient.post('/categories', categoryData),
   update: (id: string, categoryData: { name: string; description: string }) => apiClient.put(`/categories/${id}`, categoryData),
@@ -88,6 +91,17 @@ export const searchAPI = {
   categories: (query?: string) => 
     apiClient.get('/search/categories', { params: { q: query } }),
   stats: () => apiClient.get('/search/stats'),
+};
+
+export const statsAPI = {
+  getDashboardStats: () => apiClient.get('/search/stats'),
+  getStats: () => apiClient.get('/search/stats'),
+};
+
+export const promotionsAPI = {
+  getActive: () => Promise.resolve({ data: [] }),
+  subscribe: (email: string) => Promise.resolve({ data: { message: 'Subscribed' } }),
+  getNotifications: () => Promise.resolve({ data: [] }),
 };
 
 // Keep backward compatibility
