@@ -72,8 +72,8 @@ export const ADMIN_ROUTES = {
 
 // Configuración de API
 export const API_CONFIG = {
-  BASE_URL: 'https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api',
-  TIMEOUT: 10000, // 10 segundos
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://damihvi.onrender.com/api',
+  TIMEOUT: 45000, // 45 segundos para Render
   RETRY_ATTEMPTS: 3,
 };
 

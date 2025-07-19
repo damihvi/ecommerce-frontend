@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://damihvi.onrender.com/api';
 
 const useCategories = () => {
   const [categories, setCategories] = useState([]);
