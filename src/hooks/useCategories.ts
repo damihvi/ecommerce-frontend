@@ -30,7 +30,7 @@ export function useCategories() {
   });
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchCategories = useCallback(async (page: number = 1) => {
+  const fetchCategories = useCallback(async (page: number = 1, limit: number = 10) => {
     try {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -46,9 +46,10 @@ export function useCategories() {
         throw new Error('No se encontró el token de autenticación');
       }
 
-      console.log('Fetching categories from:', `${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.BASE}?page=${page}`);
+      const url = `${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.BASE}?page=${page}&limit=${limit}`;
+      console.log('Fetching categories from:', url);
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.CATEGORIES.BASE}?page=${page}`, {
+      const response = await fetch(url, {
         signal: abortControllerRef.current.signal,
         headers: {
           ...API_HEADERS.PRIVATE,
