@@ -1,13 +1,12 @@
 import axios from 'axios';
 
-// API base URL - VPS Production Server
-export const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api';
+// API base URL - Local development
+export const API_BASE_URL = 'http://localhost:3101/api';
 
 // Create axios instance
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  withCredentials: true, // Necesario para CORS con credenciales
   headers: {
     'Content-Type': 'application/json'
   },
@@ -16,48 +15,13 @@ export const apiClient = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // Add authorization token if available
     const token = localStorage.getItem('token');
-    const roles = localStorage.getItem('user_roles');
-    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Token added to request:', token); // Debug
-    } else {
-      console.log('No token found in localStorage'); // Debug
     }
-    
-    if (roles) {
-      config.headers['X-User-Roles'] = roles;
-      console.log('Roles added to request:', roles); // Debug
-    } else {
-      console.log('No roles found in localStorage'); // Debug
-    }
-
-    console.log('Request Config:', {
-      url: config.url,
-      method: config.method,
-      headers: config.headers,
-      params: config.params
-    }); // Debug
-    
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', {
-      message: error.message,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        headers: error.config?.headers,
-        withCredentials: error.config?.withCredentials
-      },
-      response: error.response ? {
-        status: error.response.status,
-        headers: error.response.headers,
-        data: error.response.data
-      } : null
-    });
     return Promise.reject(error);
   }
 );
@@ -68,40 +32,11 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('API Error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        headers: error.config?.headers
-      }
-    }); // Debug
-
-    // Handle common errors
     if (error.response?.status === 401) {
-      // Only redirect to login if there's a token (user was logged in)
-      const token = localStorage.getItem('token');
-      if (token) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_roles');
-        window.location.href = '/login';
-      }
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_roles');
+      window.location.href = '/login';
     }
-    
-    if (error.response?.status === 403) {
-      const token = localStorage.getItem('token');
-      const roles = localStorage.getItem('user_roles');
-      console.error('Forbidden Error Details:', {
-        token: token ? 'Present' : 'Missing',
-        roles: roles || 'Missing',
-        url: error.config?.url
-      }); // Debug
-      
-      // Si es un error de permisos, formatear el mensaje
-      error.message = 'No tienes permisos para realizar esta acción';
-    }
-    
     return Promise.reject(error);
   }
 );
