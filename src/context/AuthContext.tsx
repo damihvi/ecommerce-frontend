@@ -49,17 +49,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Simular usuario logueado para desarrollo
-      setUser({
-        id: '1',
-        email: 'user@example.com',
-        name: 'Test User',
-        role: 'user',
-        isActive: true,
-        createdAt: new Date().toISOString()
-      });
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setUser(parsedUser);
+      } catch (error) {
+        // Si hay error parseando, limpiar datos
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
     setLoading(false);
   }, []);
@@ -79,6 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (userData) {
+        localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
       }
     } catch (error) {
@@ -111,6 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     delete apiClient.defaults.headers.common['Authorization'];
     setUser(null);
   };
