@@ -51,8 +51,8 @@ const Home: React.FC = () => {
     testBackend();
   }, []);
 
-  // Fetch featured products
-  const { data: featuredProducts, isLoading } = useQuery({
+  // Fetch featured products with better error handling
+  const { data: featuredProducts, isLoading, error } = useQuery({
     queryKey: ['featured-products'],
     queryFn: async () => {
       try {
@@ -60,11 +60,24 @@ const Home: React.FC = () => {
         const data = response.data;
         // Ensure we always return an array
         return Array.isArray(data) ? data : [];
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching featured products:', error);
+        
+        // If it's a 500 error, return empty array to prevent app crash
+        if (error.response?.status === 500) {
+          console.warn('Backend returning 500 - using fallback empty products');
+          return [];
+        }
+        
+        // For other errors, still return empty array but log the issue
         return [];
       }
     },
+    // Retry failed requests
+    retry: 2,
+    retryDelay: 1000,
+    // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   // Show loading state
@@ -102,6 +115,15 @@ const Home: React.FC = () => {
               <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
                 Descubre productos increíbles con experiencias únicas en mi proyecto de final de semestre.
               </p>
+              
+              {/* Backend Status Indicator */}
+              <div className="inline-flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-4">
+                <div className={`w-2 h-2 rounded-full mr-2 ${
+                  backendStatus.includes('✅') ? 'bg-green-400' : 
+                  backendStatus.includes('❌') ? 'bg-red-400' : 'bg-yellow-400 animate-pulse'
+                }`}></div>
+                <span className="text-white/90 text-sm">{backendStatus}</span>
+              </div>
             </div>
             
             {/* Action Buttons */}
@@ -248,7 +270,23 @@ const Home: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-dark-600 text-lg">No hay productos destacados disponibles en este momento.</p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 max-w-2xl mx-auto">
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-yellow-800 mb-2">
+                  Productos no disponibles temporalmente
+                </h3>
+                <p className="text-yellow-700 mb-4">
+                  El backend está iniciando o hay un problema temporal con la base de datos. 
+                  Los productos destacados aparecerán pronto.
+                </p>
+                <div className="text-sm text-yellow-600">
+                  <p>Estado del backend: <span className="font-medium">{backendStatus}</span></p>
+                </div>
+              </div>
             </div>
           )}
           
