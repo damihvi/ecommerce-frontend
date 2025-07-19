@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
 interface UserFormData {
@@ -11,10 +12,17 @@ interface UserFormData {
   dateOfBirth: string;
 }
 
+interface PasswordFormData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 const Profile: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [formData, setFormData] = useState<UserFormData>({
     firstName: '',
     lastName: '',
@@ -22,15 +30,16 @@ const Profile: React.FC = () => {
     phone: '',
     dateOfBirth: ''
   });
-
-  // Redireccionar si no está autenticado
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
+  const [passwordData, setPasswordData] = useState<PasswordFormData>({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   // Cargar datos del usuario cuando el componente se monta
   useEffect(() => {
     if (user) {
+      console.log('Loading user data:', user); // Debug log
       setFormData({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
@@ -41,20 +50,70 @@ const Profile: React.FC = () => {
     }
   }, [user]);
 
+  console.log('Profile - Current user:', user); // Debug log
+
+  // Redireccionar si no está autenticado
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      // Aquí irían las llamadas API para actualizar el perfil
-      // Por ahora solo simulamos la actualización
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Updating profile with data:', formData); // Debug log
+      
+      // Llamada real a la API para actualizar el perfil
+      const response = await authAPI.updateProfile(formData);
+      console.log('Profile update response:', response); // Debug log
       
       toast.success('Perfil actualizado correctamente');
       setIsEditing(false);
-    } catch (error) {
-      toast.error('Error al actualizar el perfil');
+      
+      // Actualizar el localStorage con los nuevos datos si la API los devuelve
+      if (response.data?.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+    } catch (error: any) {
       console.error('Error updating profile:', error);
+      toast.error(error.response?.data?.message || 'Error al actualizar el perfil');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    
+    if (passwordData.newPassword.length < 6) {
+      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      await authAPI.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      
+      toast.success('Contraseña cambiada correctamente');
+      setShowPasswordForm(false);
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      toast.error(error.response?.data?.message || 'Error al cambiar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -118,7 +177,7 @@ const Profile: React.FC = () => {
               onClick={handleLogout}
               className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
             >
-              Cerrar Sesión
+              🚪 Cerrar Sesión
             </button>
           </div>
         </div>
@@ -130,8 +189,8 @@ const Profile: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="text-center mb-6">
-                <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-primary-600">
+                <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-blue-600">
                     {getUserInitials()}
                   </span>
                 </div>
@@ -157,9 +216,9 @@ const Profile: React.FC = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Estado:</span>
                       <span className={`font-medium ${
-                        user?.isActive ? 'text-green-600' : 'text-red-600'
+                        user?.isActive !== false ? 'text-green-600' : 'text-red-600'
                       }`}>
-                        {user?.isActive ? 'Activo' : 'Inactivo'}
+                        {user?.isActive !== false ? 'Activo' : 'Inactivo'}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -186,161 +245,230 @@ const Profile: React.FC = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Información Personal */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Información Personal</h3>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  {isEditing ? 'Cancelar' : 'Editar'}
-                </button>
-              </div>
+            {!showPasswordForm ? (
+              <>
+                {/* Información Personal */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Información Personal</h3>
+                    <button
+                      onClick={() => setIsEditing(!isEditing)}
+                      className="text-blue-600 hover:text-blue-700 font-medium"
+                      disabled={loading}
+                    >
+                      {isEditing ? 'Cancelar' : '✏️ Editar'}
+                    </button>
+                  </div>
 
-              {isEditing ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        required
-                      />
+                  {isEditing ? (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nombre
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.firstName}
+                            onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                            disabled={loading}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Apellido
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.lastName}
+                            onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                            disabled={loading}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          required
+                          disabled={loading}
+                        />
+                      </div>
+                      
+                      <div className="flex space-x-4">
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                          {loading ? 'Guardando...' : '💾 Guardar Cambios'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(false)}
+                          className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                          disabled={loading}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Nombre
+                          </label>
+                          <p className="text-gray-900">{user?.firstName || 'No especificado'}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Apellido
+                          </label>
+                          <p className="text-gray-900">{user?.lastName || 'No especificado'}</p>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email
+                        </label>
+                        <p className="text-gray-900">{user?.email}</p>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nombre completo
+                        </label>
+                        <p className="text-gray-900">{user?.name || 'No especificado'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Apellido
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.lastName}
-                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        required
-                      />
+                  )}
+                </div>
+
+                {/* Configuración de seguridad */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Configuración de Seguridad</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Cambiar Contraseña</h4>
+                        <p className="text-sm text-gray-600">Actualiza tu contraseña para mantener tu cuenta segura</p>
+                      </div>
+                      <button 
+                        onClick={() => setShowPasswordForm(true)}
+                        className="text-blue-600 hover:text-blue-700 font-medium"
+                        disabled={loading}
+                      >
+                        🔒 Cambiar
+                      </button>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Autenticación de Dos Factores</h4>
+                        <p className="text-sm text-gray-600">Próximamente - Añade una capa extra de seguridad a tu cuenta</p>
+                      </div>
+                      <button 
+                        disabled
+                        className="text-gray-400 font-medium cursor-not-allowed"
+                      >
+                        Configurar
+                      </button>
                     </div>
                   </div>
-                  
+                </div>
+              </>
+            ) : (
+              /* Formulario de cambio de contraseña */
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-900">Cambiar Contraseña</h3>
+                  <button
+                    onClick={() => setShowPasswordForm(false)}
+                    className="text-gray-600 hover:text-gray-700 font-medium"
+                    disabled={loading}
+                  >
+                    ← Volver al Perfil
+                  </button>
+                </div>
+
+                <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
+                      Contraseña Actual
                     </label>
                     <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
+                      disabled={loading}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Teléfono
+                      Nueva Contraseña
                     </label>
                     <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      placeholder="Opcional"
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                      minLength={6}
+                      disabled={loading}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fecha de Nacimiento
+                      Confirmar Nueva Contraseña
                     </label>
                     <input
-                      type="date"
-                      value={formData.dateOfBirth}
-                      onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                      minLength={6}
+                      disabled={loading}
                     />
                   </div>
-                  
+
                   <div className="flex space-x-4">
                     <button
                       type="submit"
                       disabled={loading}
-                      className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                     >
-                      {loading ? 'Guardando...' : 'Guardar Cambios'}
+                      {loading ? 'Cambiando...' : '🔒 Cambiar Contraseña'}
                     </button>
                     <button
                       type="button"
-                      onClick={() => setIsEditing(false)}
+                      onClick={() => setShowPasswordForm(false)}
                       className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                      disabled={loading}
                     >
                       Cancelar
                     </button>
                   </div>
                 </form>
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nombre
-                      </label>
-                      <p className="text-gray-900">{user?.firstName || 'No especificado'}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Apellido
-                      </label>
-                      <p className="text-gray-900">{user?.lastName || 'No especificado'}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <p className="text-gray-900">{user?.email}</p>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nombre completo
-                    </label>
-                    <p className="text-gray-900">{user?.name || 'No especificado'}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Configuración de seguridad */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Configuración de Seguridad</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900">Cambiar Contraseña</h4>
-                    <p className="text-sm text-gray-600">Actualiza tu contraseña para mantener tu cuenta segura</p>
-                  </div>
-                  <button className="text-primary-600 hover:text-primary-700 font-medium">
-                    Cambiar
-                  </button>
-                </div>
-                
-                <div className="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900">Autenticación de Dos Factores</h4>
-                    <p className="text-sm text-gray-600">Añade una capa extra de seguridad a tu cuenta</p>
-                  </div>
-                  <button className="text-primary-600 hover:text-primary-700 font-medium">
-                    Configurar
-                  </button>
-                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

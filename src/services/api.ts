@@ -48,6 +48,10 @@ export const authAPI = {
     apiClient.post('/auth/login', credentials),
   register: (userData: { username: string; email: string; password: string }) =>
     apiClient.post('/auth/register', userData),
+  getProfile: () => apiClient.get('/auth/profile'),
+  updateProfile: (userData: any) => apiClient.put('/auth/profile', userData),
+  changePassword: (passwordData: { currentPassword: string; newPassword: string }) =>
+    apiClient.put('/auth/change-password', passwordData),
 };
 
 export const usersAPI = {
