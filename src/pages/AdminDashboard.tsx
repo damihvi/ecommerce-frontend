@@ -42,15 +42,6 @@ interface User {
   updatedAt: string;
 }
 
-interface ProductFormData {
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  categoryId: string;
-  imageUrl?: string;
-}
-
 interface CategoryFormData {
   name: string;
   description: string;
@@ -71,24 +62,14 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users' | 'stats'>('products');
   
   // Estados para modales
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   
   // Estados para edición
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
   // Estados para formularios
-  const [productFormData, setProductFormData] = useState<ProductFormData>({
-    title: '',
-    description: '',
-    price: 0,
-    stock: 0,
-    categoryId: '',
-  });
-  
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
     name: '',
     description: '',
@@ -109,25 +90,6 @@ const AdminDashboard: React.FC = () => {
   const { categories, loading: categoriesLoading } = useCategories();
   
   // Mutations
-  const createProductMutation = useMutation({
-    mutationFn: (data: FormData) => productsAPI.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      setIsProductModalOpen(false);
-      toast.success('Producto creado exitosamente');
-    },
-  });
-  
-  const updateProductMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: FormData }) => productsAPI.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      setIsProductModalOpen(false);
-      setEditingProduct(null);
-      toast.success('Producto actualizado exitosamente');
-    },
-  });
-  
   const createCategoryMutation = useMutation({
     mutationFn: (data: CategoryFormData) => categoriesAPI.create(data),
     onSuccess: () => {
@@ -148,28 +110,6 @@ const AdminDashboard: React.FC = () => {
     },
   });
   // Manejadores de formularios
-  const handleProductSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const formData = new FormData();
-    Object.entries(productFormData).forEach(([key, value]) => {
-      if (value !== undefined) {
-        formData.append(key, value.toString());
-      }
-    });
-
-    try {
-      if (editingProduct) {
-        await updateProductMutation.mutateAsync({ id: editingProduct.id, data: formData });
-      } else {
-        await createProductMutation.mutateAsync(formData);
-      }
-    } catch (error) {
-      console.error('Error al guardar producto:', error);
-      toast.error('Error al guardar el producto');
-    }
-  };
-
   const handleCategorySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -385,130 +325,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Product Modal */}
-      {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsProductModalOpen(false)}></div>
-            
-            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-              <div className="sm:flex sm:items-start">
-                <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-                  </h3>
-                  
-                  <form onSubmit={handleProductSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Nombre del Producto *
-                      </label>
-                      <input
-                        type="text"
-                        value={productFormData.title}
-                        onChange={(e) => setProductFormData(prev => ({ ...prev, title: e.target.value }))}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Descripción *
-                      </label>
-                      <textarea
-                        value={productFormData.description}
-                        onChange={(e) => setProductFormData(prev => ({ ...prev, description: e.target.value }))}
-                        required
-                        rows={3}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Precio *
-                        </label>
-                        <input
-                          type="number"
-                          value={productFormData.price}
-                          onChange={(e) => setProductFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
-                          required
-                          min="0"
-                          step="0.01"
-                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Stock
-                        </label>
-                        <input
-                          type="number"
-                          value={productFormData.stock}
-                          onChange={(e) => setProductFormData(prev => ({ ...prev, stock: Number(e.target.value) }))}
-                          min="0"
-                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Categoría *
-                      </label>
-                      <select
-                        value={productFormData.categoryId}
-                        onChange={(e) => setProductFormData(prev => ({ ...prev, categoryId: e.target.value }))}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      >
-                        <option value="">Selecciona una categoría</option>
-                        {Array.isArray(categories) && categories.map((category: Category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Imagen del Producto
-                      </label>
-                      <ImageUpload
-                        onImageUploaded={(url) => setProductFormData(prev => ({ ...prev, imageUrl: url }))}
-                        currentImageUrl={productFormData.imageUrl}
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div className="flex justify-end space-x-3 mt-6">
-                      <button
-                        type="button"
-                        onClick={() => setIsProductModalOpen(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={createProductMutation.isPending || updateProductMutation.isPending}
-                        className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
-                      >
-                        {editingProduct ? 'Actualizar' : 'Crear'}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Category Modal */}
       {isCategoryModalOpen && (
