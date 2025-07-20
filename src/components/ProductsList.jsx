@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import useProducts from '../hooks/useProducts';
 import useCategories from '../hooks/useCategories';
+import ImageUpload from './ImageUpload';
+import { productsAPI } from '../services/api';
 
 export default function ProductsList() {
   const {
@@ -25,7 +27,8 @@ export default function ProductsList() {
     price: '',
     stock: '',
     categoryId: '',
-    brand: ''
+    brand: '',
+    imageUrl: ''
   });
 
   const resetForm = () => {
@@ -35,7 +38,8 @@ export default function ProductsList() {
       price: '',
       stock: '',
       categoryId: '',
-      brand: ''
+      brand: '',
+      imageUrl: ''
     });
     setEditingProduct(null);
   };
@@ -48,7 +52,8 @@ export default function ProductsList() {
       price: product.price?.toString() || '',
       stock: product.stock?.toString() || '',
       categoryId: product.categoryId || '',
-      brand: product.brand || ''
+      brand: product.brand || '',
+      imageUrl: product.imageUrl || ''
     });
     setIsModalOpen(true);
   };
@@ -61,7 +66,8 @@ export default function ProductsList() {
         description: formData.description,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        categoryId: formData.categoryId
+        categoryId: formData.categoryId,
+        imageUrl: formData.imageUrl
       };
 
       if (editingProduct) {
@@ -119,6 +125,7 @@ export default function ProductsList() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Imagen</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
@@ -130,6 +137,26 @@ export default function ProductsList() {
             <tbody className="bg-white divide-y divide-gray-200">
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                      {product.imageUrl ? (
+                        <img
+                          src={productsAPI.getImageUrl(product.imageUrl)}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`flex items-center justify-center w-full h-full ${product.imageUrl ? 'hidden' : ''}`}>
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{product.name}</div>
                     <div className="text-sm text-gray-500">{product.description}</div>
@@ -227,7 +254,7 @@ export default function ProductsList() {
       {/* Modal de crear/editar producto */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border max-w-2xl w-full mx-4 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingProduct ? 'Editar Producto' : 'Agregar Producto'}
@@ -241,6 +268,14 @@ export default function ProductsList() {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Imagen del Producto</label>
+                  <ImageUpload
+                    onImageUploaded={(imageUrl) => setFormData({ ...formData, imageUrl })}
+                    currentImageUrl={formData.imageUrl}
+                    className="w-full"
                   />
                 </div>
                 <div>

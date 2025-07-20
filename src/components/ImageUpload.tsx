@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { uploadAPI, productsAPI } from '../services/api';
 
 export interface ImageUploadProps {
   onImageUploaded?: (imageUrl: string) => void;
@@ -13,8 +14,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   className = ''
 }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
+  const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Update preview when currentImageUrl changes
+  useEffect(() => {
+    if (currentImageUrl) {
+      // If it's a backend image path, construct the full URL
+      if (currentImageUrl && !currentImageUrl.startsWith('http') && !currentImageUrl.startsWith('blob:')) {
+        setPreview(productsAPI.getImageUrl(currentImageUrl));
+      } else {
+        setPreview(currentImageUrl);
+      }
+    } else {
+      setPreview(null);
+    }
+  }, [currentImageUrl]);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -32,17 +47,42 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       return;
     }
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      setIsUploading(true);
+      
+      // Create preview immediately for better UX
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
 
-    // For now, just use a placeholder URL or file name
-    // In a real implementation, you would upload to a service like Cloudinary or AWS S3
-    const imageUrl = URL.createObjectURL(file);
-    onImageUploaded?.(imageUrl);
+      // Upload to backend
+      const response = await uploadAPI.uploadImage(file);
+      
+      // Handle different possible response structures
+      const imageUrl = response.data.imageUrl || response.data.data?.imageUrl || response.data.filename;
+      
+      if (imageUrl) {
+        // Update the form with the backend image path
+        onImageUploaded?.(imageUrl);
+        toast.success('Imagen subida exitosamente');
+        
+        // Update preview to show the backend image
+        setPreview(productsAPI.getImageUrl(imageUrl));
+      } else {
+        throw new Error('No se recibió URL de imagen del servidor');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      // If upload fails, create a local preview for now and notify the user
+      const localUrl = URL.createObjectURL(file);
+      setPreview(localUrl);
+      onImageUploaded?.(file.name); // Use filename as fallback
+      toast.error('Advertencia: Imagen cargada localmente. El backend no está disponible.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRemoveImage = () => {

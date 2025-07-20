@@ -109,6 +109,18 @@ export const promotionsAPI = {
   getNotifications: () => Promise.resolve({ data: [] }),
 };
 
+export const uploadAPI = {
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return apiClient.post('/uploads/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+};
+
 // Keep backward compatibility
 export const api = apiClient;
 export default apiClient;
