@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { API_CONFIG, API_HEADERS, ADMIN_ROUTES } from '../routes';
-import { User, UserFormData, Pagination } from '../types';
+import { User, UserFormData, Pagination, CreateUserData } from '../types';
 
 export default function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
@@ -102,17 +102,24 @@ export default function useUsers() {
     }
   }, []);
 
-  const createUser = useCallback(async (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createUser = useCallback(async (userData: CreateUserData) => {
     setIsCreating(true);
     setError(null);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.USERS.CREATE}`, {
+      // Use auth/register endpoint since it works for creating users
+      const registerData = {
+        username: userData.username,
+        email: userData.email,
+        password: userData.password
+      };
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           ...API_HEADERS.PRIVATE,
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(registerData)
       });
       
       const data = await response.json();
