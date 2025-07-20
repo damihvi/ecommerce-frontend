@@ -11,7 +11,8 @@ export default function ProductsList() {
     fetchProducts,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    toggleProductActive
   } = useProducts();
 
   const { categories } = useCategories();
@@ -119,6 +120,7 @@ export default function ProductsList() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
               </tr>
             </thead>
@@ -138,7 +140,26 @@ export default function ProductsList() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.category?.name || 'Sin categoría'}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      product.isActive
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {product.isActive ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => toggleProductActive(product.id)}
+                      className={`mr-3 px-3 py-1 rounded text-xs ${
+                        product.isActive
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      }`}
+                    >
+                      {product.isActive ? 'Desactivar' : 'Activar'}
+                    </button>
                     <button
                       onClick={() => handleEdit(product)}
                       className="text-indigo-600 hover:text-indigo-900 mr-3"

@@ -5,7 +5,7 @@ interface Category {
   id: string;
   name: string;
   description?: string;
-  active?: boolean;
+  isActive?: boolean;
 }
 
 interface Pagination {
@@ -170,6 +170,37 @@ export function useCategories() {
     fetchCategories();
   }, [fetchCategories]);
 
+  const toggleCategoryActive = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/categories/${id}/toggle-active`, {
+        method: 'PUT',
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cambiar estado de la categoría');
+      }
+
+      const data = await response.json();
+      if (data?.success) {
+        await fetchCategories();
+      } else {
+        throw new Error(data.message || 'Error al cambiar estado de la categoría');
+      }
+    } catch (err) {
+      console.error('Error toggling category status:', err);
+      setError(err instanceof Error ? err.message : 'Error al cambiar estado de la categoría');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchCategories]);
+
   return {
     categories,
     loading,
@@ -178,7 +209,8 @@ export function useCategories() {
     fetchCategories,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    toggleCategoryActive
   };
 }
 

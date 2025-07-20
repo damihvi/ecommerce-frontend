@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import useCategories from '../hooks/useCategories';
+import { useCategories } from '../hooks/useCategories';
 import { useAuth } from '../context/AuthContext';
 
 interface Category {
   id: string;
   name: string;
   description?: string;
-  active?: boolean;
+  isActive?: boolean;
 }
 
 interface CategoryFormData {
@@ -25,7 +25,8 @@ const CategoriesList: React.FC = () => {
     fetchCategories,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    toggleCategoryActive
   } = useCategories();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -161,12 +162,22 @@ const CategoriesList: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs rounded-full ${
-                      category.active !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      category.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
-                      {category.active !== false ? 'Activa' : 'Inactiva'}
+                      {category.isActive !== false ? 'Activa' : 'Inactiva'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => toggleCategoryActive && toggleCategoryActive(category.id)}
+                      className={`mr-3 px-3 py-1 rounded text-xs ${
+                        category.isActive !== false
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      }`}
+                    >
+                      {category.isActive !== false ? 'Desactivar' : 'Activar'}
+                    </button>
                     <button
                       onClick={() => handleEdit(category)}
                       className="text-indigo-600 hover:text-indigo-900 mr-3"

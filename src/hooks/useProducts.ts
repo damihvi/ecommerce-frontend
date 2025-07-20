@@ -183,9 +183,34 @@ export function useProducts() {
     }
   }, [fetchProducts, pagination.currentPage]);
 
-  const toggleProductActive = useCallback(async (id: string, active: boolean) => {
-    await updateProduct(id, { active });
-  }, [updateProduct]);
+  const toggleProductActive = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products/${id}/toggle-active`, {
+        method: 'PUT',
+        headers: {
+          ...API_HEADERS.PRIVATE,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Error al cambiar estado del producto');
+      
+      const data = await response.json();
+      if (data?.success) {
+        // Refetch para actualizar lista
+        await fetchProducts(pagination.currentPage);
+      } else {
+        throw new Error(data.message || 'Error al cambiar estado del producto');
+      }
+    } catch (err) {
+      console.error('Error toggling product status:', err);
+      setError(err instanceof Error ? err.message : 'Error al cambiar estado del producto');
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchProducts, pagination.currentPage]);
 
   const toggleProductFeatured = useCallback(async (id: string, featured: boolean) => {
     await updateProduct(id, { featured });

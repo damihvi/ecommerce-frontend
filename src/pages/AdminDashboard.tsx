@@ -5,7 +5,7 @@ import UsersList from '../components/UsersList';
 import ProductsList from '../components/ProductsList';
 import CategoriesList from '../components/CategoriesList';
 import useProducts from '../hooks/useProducts';
-import useCategories from '../hooks/useCategories';
+import { useCategories } from '../hooks/useCategories';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsAPI, categoriesAPI } from '../services/api';
 import toast from 'react-hot-toast';
