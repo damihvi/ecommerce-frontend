@@ -5,14 +5,14 @@ import { productsAPI, categoriesAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 
 interface Product {
-  id: number;
-  title: string;
+  id: string;
+  name: string;
   description: string;
   price: number;
   imageUrl?: string;
   stock: number;
   category: {
-    id: number;
+    id: string;
     name: string;
   };
 }
@@ -63,9 +63,9 @@ const Products: React.FC = () => {
     retryDelay: 1000,
   });
 
-  const handleAddToCart = async (productId: number) => {
+  const handleAddToCart = async (product: Product) => {
     try {
-      await addToCart(productId, 1);
+      await addToCart(product, 1);
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
@@ -164,7 +164,7 @@ const Products: React.FC = () => {
                   {product.imageUrl ? (
                     <img
                       src={productsAPI.getImageUrl(product.imageUrl)}
-                      alt={product.title}
+                      alt={product.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
@@ -187,7 +187,7 @@ const Products: React.FC = () => {
                       to={`/products/${product.id}`} 
                       className="hover:text-primary-600"
                     >
-                      {product.title}
+                      {product.name}
                     </Link>
                   </h3>
                   
@@ -210,7 +210,7 @@ const Products: React.FC = () => {
                     </span>
                     
                     <button
-                      onClick={() => handleAddToCart(product.id)}
+                      onClick={() => handleAddToCart(product)}
                       disabled={product.stock === 0}
                       className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                         product.stock === 0
@@ -228,41 +228,41 @@ const Products: React.FC = () => {
             // Sample products when no backend data is available
             [
               {
-                id: 1,
-                title: "Smartphone Premium",
+                id: "1",
+                name: "Smartphone Premium",
                 description: "Último modelo con características avanzadas",
                 price: 699.99,
                 stock: 15,
-                category: { name: "Tecnología" }
+                category: { id: "1", name: "Tecnología" }
               },
               {
-                id: 2,
-                title: "Laptop Gaming",
+                id: "2",
+                name: "Laptop Gaming",
                 description: "Perfecta para juegos y trabajo profesional",
                 price: 1299.99,
                 stock: 8,
-                category: { name: "Computación" }
+                category: { id: "2", name: "Computación" }
               },
               {
-                id: 3,
-                title: "Auriculares Inalámbricos",
+                id: "3",
+                name: "Auriculares Inalámbricos",
                 description: "Sonido de alta calidad con cancelación de ruido",
                 price: 199.99,
                 stock: 25,
-                category: { name: "Audio" }
+                category: { id: "3", name: "Audio" }
               },
               {
-                id: 4,
-                title: "Cámara Digital",
+                id: "4",
+                name: "Cámara Digital",
                 description: "Captura momentos con calidad profesional",
                 price: 549.99,
                 stock: 12,
-                category: { name: "Fotografía" }
+                category: { id: "4", name: "Fotografía" }
               },
             ]
               .filter(product => 
                 !searchTerm || 
-                product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.description.toLowerCase().includes(searchTerm.toLowerCase())
               )
               .map((product) => (
@@ -279,7 +279,7 @@ const Products: React.FC = () => {
                         to={`/products/${product.id}`} 
                         className="hover:text-primary-600"
                       >
-                        {product.title}
+                        {product.name}
                       </Link>
                     </h3>
                     
@@ -302,7 +302,7 @@ const Products: React.FC = () => {
                       </span>
                       
                       <button
-                        onClick={() => handleAddToCart(product.id)}
+                        onClick={() => handleAddToCart(product)}
                         disabled={product.stock === 0}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                           product.stock === 0

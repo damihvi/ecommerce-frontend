@@ -85,7 +85,7 @@ const Cart: React.FC = () => {
                         {item.product.imageUrl ? (
                           <img
                             src={item.product.imageUrl}
-                            alt={item.product.title}
+                            alt={item.product.name}
                             className="w-full h-full object-cover rounded-md"
                           />
                         ) : (
@@ -96,7 +96,7 @@ const Cart: React.FC = () => {
                       {/* Product Info */}
                       <div className="flex-1">
                         <h3 className="text-sm font-medium text-gray-900">
-                          {item.product.title}
+                          {item.product.name}
                         </h3>
                         <p className="text-sm text-gray-500">
                           ${item.price.toFixed(2)} each
