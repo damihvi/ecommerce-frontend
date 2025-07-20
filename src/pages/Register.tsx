@@ -30,11 +30,11 @@ const Register: React.FC = () => {
     try {
       const { confirmPassword, ...registerData } = data;
       await registerUser(registerData);
-      toast.success('Registration successful!');
+      toast.success('¡Registro exitoso!');
       navigate('/');
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.message || 'Error en el registro');
     } finally {
       setIsLoading(false);
     }
@@ -45,15 +45,15 @@ const Register: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
+            Crear tu cuenta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            O{' '}
             <Link
               to="/login"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              sign in to your existing account
+              inicia sesión en tu cuenta existente
             </Link>
           </p>
         </div>
@@ -62,15 +62,15 @@ const Register: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  First Name
+                  Nombre
                 </label>
                 <input
                   {...register('firstName', {
-                    required: 'First name is required',
+                    required: 'El nombre es requerido',
                   })}
                   type="text"
                   className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                  placeholder="First Name"
+                  placeholder="Nombre"
                 />
                 {errors.firstName && (
                   <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
@@ -78,15 +78,15 @@ const Register: React.FC = () => {
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Last Name
+                  Apellido
                 </label>
                 <input
                   {...register('lastName', {
-                    required: 'Last name is required',
+                    required: 'El apellido es requerido',
                   })}
                   type="text"
                   className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                  placeholder="Last Name"
+                  placeholder="Apellido"
                 />
                 {errors.lastName && (
                   <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
@@ -96,20 +96,20 @@ const Register: React.FC = () => {
             
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
+                Correo Electrónico
               </label>
               <input
                 {...register('email', {
-                  required: 'Email is required',
+                  required: 'El correo electrónico es requerido',
                   pattern: {
                     value: /^\S+@\S+$/i,
-                    message: 'Invalid email address',
+                    message: 'Dirección de correo electrónico inválida',
                   },
                 })}
                 type="email"
                 autoComplete="email"
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Email address"
+                placeholder="Correo electrónico"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -118,20 +118,20 @@ const Register: React.FC = () => {
             
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Contraseña
               </label>
               <input
                 {...register('password', {
-                  required: 'Password is required',
+                  required: 'La contraseña es requerida',
                   minLength: {
                     value: 6,
-                    message: 'Password must be at least 6 characters',
+                    message: 'La contraseña debe tener al menos 6 caracteres',
                   },
                 })}
                 type="password"
                 autoComplete="new-password"
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Password"
+                placeholder="Contraseña"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
@@ -140,17 +140,17 @@ const Register: React.FC = () => {
             
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
+                Confirmar Contraseña
               </label>
               <input
                 {...register('confirmPassword', {
-                  required: 'Please confirm your password',
-                  validate: (value) => value === password || 'Passwords do not match',
+                  required: 'Por favor confirma tu contraseña',
+                  validate: (value) => value === password || 'Las contraseñas no coinciden',
                 })}
                 type="password"
                 autoComplete="new-password"
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                placeholder="Confirm Password"
+                placeholder="Confirmar contraseña"
               />
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
@@ -164,7 +164,7 @@ const Register: React.FC = () => {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
           </div>
         </form>
