@@ -69,7 +69,7 @@ const CategoriesList: React.FC = () => {
     e.preventDefault();
     try {
       if (editingCategory) {
-        await updateCategory(parseInt(editingCategory.id), formData);
+        await updateCategory(editingCategory.id, formData);
       } else {
         await createCategory(formData);
       }
@@ -85,7 +85,7 @@ const CategoriesList: React.FC = () => {
   const handleDelete = async (categoryId: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
       try {
-        await deleteCategory(parseInt(categoryId));
+        await deleteCategory(categoryId);
         fetchCategories();
       } catch (error) {
         console.error('Error:', error);
@@ -193,7 +193,7 @@ const CategoriesList: React.FC = () => {
           {Array.from({ length: pagination.totalPages }, (_, i) => (
             <button
               key={i + 1}
-              onClick={() => fetchCategories(i + 1)}
+              onClick={() => fetchCategories()}
               className={`px-3 py-1 border rounded ${
                 pagination.currentPage === i + 1
                   ? 'bg-primary-600 text-white'
