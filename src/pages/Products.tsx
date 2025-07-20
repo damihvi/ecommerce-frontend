@@ -41,12 +41,19 @@ const Products: React.FC = () => {
   const { data: products, isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ['products', selectedCategory, searchTerm],
     queryFn: async () => {
-      const params: any = {};
+      const params: any = { isActive: true }; // Only fetch active products for public view
       if (selectedCategory) params.categoryId = selectedCategory;
       if (searchTerm) params.search = searchTerm;
       
       const response = await productsAPI.getAll(params);
-      return response.data;
+      // Filter active products and convert price from string to number
+      const processedData = response.data
+        .filter((product: any) => product.isActive) // Client-side filter for active products
+        .map((product: any) => ({
+          ...product,
+          price: parseFloat(product.price)
+        }));
+      return processedData;
     },
     retry: 1,
     retryDelay: 1000,
@@ -225,118 +232,28 @@ const Products: React.FC = () => {
               </div>
             ))
           ) : (
-            // Sample products when no backend data is available
-            [
-              {
-                id: "1",
-                name: "Smartphone Premium",
-                description: "Último modelo con características avanzadas",
-                price: 699.99,
-                stock: 15,
-                category: { id: "1", name: "Tecnología" }
-              },
-              {
-                id: "2",
-                name: "Laptop Gaming",
-                description: "Perfecta para juegos y trabajo profesional",
-                price: 1299.99,
-                stock: 8,
-                category: { id: "2", name: "Computación" }
-              },
-              {
-                id: "3",
-                name: "Auriculares Inalámbricos",
-                description: "Sonido de alta calidad con cancelación de ruido",
-                price: 199.99,
-                stock: 25,
-                category: { id: "3", name: "Audio" }
-              },
-              {
-                id: "4",
-                name: "Cámara Digital",
-                description: "Captura momentos con calidad profesional",
-                price: 549.99,
-                stock: 12,
-                category: { id: "4", name: "Fotografía" }
-              },
-            ]
-              .filter(product => 
-                !searchTerm || 
-                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.description.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map((product) => (
-                <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                  {/* Product Image */}
-                  <div className="h-48 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-                    <div className="text-6xl">📱</div>
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      <Link 
-                        to={`/products/${product.id}`} 
-                        className="hover:text-primary-600"
-                      >
-                        {product.name}
-                      </Link>
-                    </h3>
-                    
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                      {product.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-2xl font-bold text-primary-600">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        Stock: {product.stock}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {product.category.name}
-                      </span>
-                      
-                      <button
-                        onClick={() => handleAddToCart(product)}
-                        disabled={product.stock === 0}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                          product.stock === 0
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-primary-600 text-white hover:bg-primary-700'
-                        }`}
-                      >
-                        {product.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
+            <div className="col-span-full text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">�</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No hay productos disponibles
+              </h3>
+              <p className="text-gray-600">
+                {searchTerm 
+                  ? `No se encontraron productos para "${searchTerm}"`
+                  : 'Actualmente no hay productos disponibles. Vuelve pronto para ver nuestras novedades.'
+                }
+              </p>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="mt-4 bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                  Limpiar búsqueda
+                </button>
+              )}
+            </div>
           )}
         </div>
-
-        {/* Empty State */}
-        {searchTerm && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">�</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No se encontraron productos para "{searchTerm}"
-            </h3>
-            <p className="text-gray-600">
-              Intenta con otros términos de búsqueda o explora nuestras categorías
-            </p>
-            <button
-              onClick={() => setSearchTerm('')}
-              className="mt-4 bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Limpiar búsqueda
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
