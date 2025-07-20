@@ -157,7 +157,7 @@ export default function ProductsList() {
                       {/* Toggle Active/Inactive */}
                       <button
                         onClick={() => toggleProductActive(product.id)}
-                        className={`p-2 rounded-full transition-colors ${
+                        className={`px-3 py-2 rounded-lg transition-colors ${
                           product.isActive
                             ? 'bg-red-100 text-red-600 hover:bg-red-200'
                             : 'bg-green-100 text-green-600 hover:bg-green-200'
@@ -166,7 +166,7 @@ export default function ProductsList() {
                       >
                         {product.isActive ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         ) : (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +178,7 @@ export default function ProductsList() {
                       {/* Edit Button */}
                       <button
                         onClick={() => handleEdit(product)}
-                        className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors"
+                        className="px-3 py-2 rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors"
                         title="Editar producto"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +189,7 @@ export default function ProductsList() {
                       {/* Delete Button */}
                       <button
                         onClick={() => handleDelete(product.id)}
-                        className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                        className="px-3 py-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
                         title="Eliminar producto"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
