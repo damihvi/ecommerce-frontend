@@ -24,8 +24,7 @@ export default function ProductsList() {
     price: '',
     stock: '',
     categoryId: '',
-    brand: '',
-    sku: ''
+    brand: ''
   });
 
   const resetForm = () => {
@@ -35,8 +34,7 @@ export default function ProductsList() {
       price: '',
       stock: '',
       categoryId: '',
-      brand: '',
-      sku: ''
+      brand: ''
     });
     setEditingProduct(null);
   };
@@ -49,8 +47,7 @@ export default function ProductsList() {
       price: product.price?.toString() || '',
       stock: product.stock?.toString() || '',
       categoryId: product.categoryId || '',
-      brand: product.brand || '',
-      sku: product.sku || ''
+      brand: product.brand || ''
     });
     setIsModalOpen(true);
   };
@@ -119,7 +116,6 @@ export default function ProductsList() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
@@ -132,9 +128,6 @@ export default function ProductsList() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{product.name}</div>
                     <div className="text-sm text-gray-500">{product.description}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.sku}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${product.price}
@@ -200,16 +193,6 @@ export default function ProductsList() {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">SKU</label>
-                  <input
-                    type="text"
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     required
                   />
