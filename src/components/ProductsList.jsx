@@ -4,6 +4,25 @@ import useCategories from '../hooks/useCategories';
 import ImageUpload from './ImageUpload';
 import { productsAPI } from '../services/api';
 
+// Helper function to get the correct image URL
+const getProductImageUrl = (imageUrl) => {
+  if (!imageUrl) return '';
+  
+  // If it's a localStorage key (starts with 'product_image_')
+  if (imageUrl.startsWith('product_image_')) {
+    const storedImage = localStorage.getItem(imageUrl);
+    return storedImage || '';
+  }
+  
+  // If it's already a full URL
+  if (imageUrl.startsWith('http') || imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
+    return imageUrl;
+  }
+  
+  // Otherwise, construct backend URL
+  return productsAPI.getImageUrl(imageUrl);
+};
+
 export default function ProductsList() {
   const {
     products,
@@ -141,7 +160,7 @@ export default function ProductsList() {
                     <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                       {product.imageUrl ? (
                         <img
-                          src={productsAPI.getImageUrl(product.imageUrl)}
+                          src={getProductImageUrl(product.imageUrl)}
                           alt={product.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {

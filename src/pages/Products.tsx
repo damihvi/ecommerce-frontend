@@ -4,6 +4,25 @@ import { useQuery } from '@tanstack/react-query';
 import { productsAPI, categoriesAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 
+// Helper function to get the correct image URL
+const getProductImageUrl = (imageUrl: string): string => {
+  if (!imageUrl) return '';
+  
+  // If it's a localStorage key (starts with 'product_image_')
+  if (imageUrl.startsWith('product_image_')) {
+    const storedImage = localStorage.getItem(imageUrl);
+    return storedImage || '';
+  }
+  
+  // If it's already a full URL
+  if (imageUrl.startsWith('http') || imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
+    return imageUrl;
+  }
+  
+  // Otherwise, construct backend URL
+  return productsAPI.getImageUrl(imageUrl);
+};
+
 interface Product {
   id: string;
   name: string;
@@ -176,7 +195,7 @@ const Products: React.FC = () => {
                 <div className="h-48 bg-gray-200 flex items-center justify-center">
                   {product.imageUrl ? (
                     <img
-                      src={productsAPI.getImageUrl(product.imageUrl)}
+                      src={getProductImageUrl(product.imageUrl)}
                       alt={product.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {

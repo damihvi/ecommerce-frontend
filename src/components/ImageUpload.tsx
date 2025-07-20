@@ -20,10 +20,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   // Update preview when currentImageUrl changes
   useEffect(() => {
     if (currentImageUrl) {
+      // If it's a localStorage key (starts with 'product_image_')
+      if (currentImageUrl.startsWith('product_image_')) {
+        const storedImage = localStorage.getItem(currentImageUrl);
+        setPreview(storedImage || null);
+      }
       // If it's a backend image path, construct the full URL
-      if (currentImageUrl && !currentImageUrl.startsWith('http') && !currentImageUrl.startsWith('blob:')) {
+      else if (currentImageUrl && !currentImageUrl.startsWith('http') && !currentImageUrl.startsWith('blob:') && !currentImageUrl.startsWith('data:')) {
         setPreview(productsAPI.getImageUrl(currentImageUrl));
-      } else {
+      } 
+      // If it's already a full URL
+      else {
         setPreview(currentImageUrl);
       }
     } else {
