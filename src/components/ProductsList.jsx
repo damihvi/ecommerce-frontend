@@ -59,9 +59,11 @@ export default function ProductsList() {
     e.preventDefault();
     try {
       const productData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         price: parseFloat(formData.price),
-        stock: parseInt(formData.stock)
+        stock: parseInt(formData.stock),
+        categoryId: formData.categoryId
       };
 
       if (editingProduct) {
