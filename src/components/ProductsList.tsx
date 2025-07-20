@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 interface Product {
   id: string;
-  title: string;
+  name: string;
   description: string;
   price: number;
   stock: number;
@@ -20,7 +20,7 @@ interface Product {
 }
 
 interface ProductFormData {
-  title: string;
+  name: string;
   description: string;
   price: number;
   stock: number;
@@ -43,7 +43,7 @@ const ProductsList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<ProductFormData>({
-    title: '',
+    name: '',
     description: '',
     price: 0,
     stock: 0,
@@ -65,7 +65,7 @@ const ProductsList: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
-      title: '',
+      name: '',
       description: '',
       price: 0,
       stock: 0,
@@ -77,7 +77,7 @@ const ProductsList: React.FC = () => {
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData({
-      title: product.title || '',
+      name: product.name || '',
       description: product.description || '',
       price: product.price || 0,
       stock: product.stock || 0,
@@ -90,7 +90,7 @@ const ProductsList: React.FC = () => {
     e.preventDefault();
     try {
       if (editingProduct) {
-        await updateProduct(parseInt(editingProduct.id), formData);
+        await updateProduct(editingProduct.id, formData);
       } else {
         await createProduct(formData);
       }
@@ -106,7 +106,7 @@ const ProductsList: React.FC = () => {
   const handleDelete = async (productId: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
       try {
-        await deleteProduct(parseInt(productId));
+        await deleteProduct(productId);
         fetchProducts();
       } catch (error) {
         console.error('Error:', error);
@@ -178,7 +178,7 @@ const ProductsList: React.FC = () => {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{product.title}</div>
+                    <div className="text-sm font-medium text-gray-900">{product.name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{product.category?.name || 'Sin categoría'}</div>
@@ -243,11 +243,11 @@ const ProductsList: React.FC = () => {
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Título</label>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
                   <input
                     type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     required
                   />

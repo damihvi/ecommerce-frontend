@@ -10,7 +10,7 @@ interface Pagination {
 
 interface Product {
   id: string;
-  title: string;
+  name: string;
   description: string;
   price: number;
   stock: number;
@@ -120,7 +120,7 @@ export function useProducts() {
     }
   }, [fetchProducts, pagination.currentPage]);
 
-  const updateProduct = useCallback(async (id: number, productData: Partial<Product>) => {
+  const updateProduct = useCallback(async (id: string, productData: Partial<Product>) => {
     setLoading(true);
     setError(null);
     try {
@@ -150,7 +150,7 @@ export function useProducts() {
     }
   }, [fetchProducts, pagination.currentPage]);
 
-  const deleteProduct = useCallback(async (id: number) => {
+  const deleteProduct = useCallback(async (id: string) => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       return;
     }
@@ -183,11 +183,11 @@ export function useProducts() {
     }
   }, [fetchProducts, pagination.currentPage]);
 
-  const toggleProductActive = useCallback(async (id: number, active: boolean) => {
+  const toggleProductActive = useCallback(async (id: string, active: boolean) => {
     await updateProduct(id, { active });
   }, [updateProduct]);
 
-  const toggleProductFeatured = useCallback(async (id: number, featured: boolean) => {
+  const toggleProductFeatured = useCallback(async (id: string, featured: boolean) => {
     await updateProduct(id, { featured });
   }, [updateProduct]);
 
