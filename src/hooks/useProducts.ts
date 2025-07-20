@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { API_CONFIG, API_HEADERS, ADMIN_ROUTES } from '../routes';
+import { API_CONFIG, API_HEADERS } from '../routes';
 
 interface Pagination {
   currentPage: number;
@@ -49,10 +49,10 @@ export function useProducts() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/admin/products?page=${page}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
         signal: abortControllerRef.current.signal,
         headers: {
-          ...API_HEADERS.PRIVATE,
+          ...API_HEADERS.PUBLIC,
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
@@ -63,18 +63,16 @@ export function useProducts() {
       console.log('Products API response:', data);
 
       if (data?.success) {
-        const productsData = data.data?.items || data.data || [];
+        const productsData = data.data || [];
         setProducts(productsData);
         
-        // Actualizar paginación si viene del backend
-        if (data.data?.meta) {
-          setPagination({
-            currentPage: data.data.meta.currentPage,
-            totalPages: data.data.meta.totalPages,
-            totalItems: data.data.meta.totalItems,
-            itemsPerPage: data.data.meta.itemsPerPage
-          });
-        }
+        // Configurar paginación simple ya que el backend no devuelve meta
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: productsData.length,
+          itemsPerPage: productsData.length
+        });
       } else {
         throw new Error(data.message || 'Error desconocido');
       }
@@ -96,7 +94,7 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.PRODUCTS.CREATE}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products`, {
         method: 'POST',
         headers: {
           ...API_HEADERS.PRIVATE,
@@ -126,8 +124,8 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.PRODUCTS.UPDATE(id.toString())}`, {
-        method: 'PATCH',
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products/${id}`, {
+        method: 'PUT',
         headers: {
           ...API_HEADERS.PRIVATE,
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -160,7 +158,7 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.PRODUCTS.DELETE(id.toString())}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products/${id}`, {
         method: 'DELETE',
         headers: {
           ...API_HEADERS.PRIVATE,
