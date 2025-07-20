@@ -31,14 +31,14 @@ export default function useUsers() {
       setIsLoading(true);
       setError(null);
 
-      console.log('Fetching users from:', `${API_CONFIG.BASE_URL}${ADMIN_ROUTES.USERS.LIST}?page=${page}`);
+      console.log('Fetching users from:', `${API_CONFIG.BASE_URL}/users`);
       
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No se encontró el token de autenticación');
       }
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}${ADMIN_ROUTES.USERS.LIST}?page=${page}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/users`, {
         signal: abortControllerRef.current.signal,
         headers: {
           ...API_HEADERS.PRIVATE,
@@ -61,7 +61,7 @@ export default function useUsers() {
       console.log('Processing response data:', data);
       
       if (data?.success) {
-        const usersData = data.data?.items || data.data || [];
+        const usersData = data.data || [];
         console.log('Users data to set:', usersData);
         
         if (!Array.isArray(usersData)) {
@@ -71,16 +71,13 @@ export default function useUsers() {
         
         setUsers(usersData);
         
-        // Actualizar paginación si viene del backend
-        if (data.data?.meta) {
-          console.log('Pagination data:', data.data.meta);
-          setPagination({
-            currentPage: data.data.meta.currentPage,
-            totalPages: data.data.meta.totalPages,
-            totalItems: data.data.meta.totalItems,
-            itemsPerPage: data.data.meta.itemsPerPage
-          });
-        }
+        // Configurar paginación simple
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: usersData.length,
+          itemsPerPage: usersData.length
+        });
       } else {
         console.error('API returned success: false:', data);
         throw new Error(data.message || 'Error desconocido');
