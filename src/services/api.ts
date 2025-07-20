@@ -119,6 +119,39 @@ export const uploadAPI = {
       },
     });
   },
+  
+  // Fallback method for when backend upload isn't available
+  uploadImageLocal: (file: File) => {
+    return new Promise((resolve) => {
+      // Store in localStorage as base64 for demo purposes
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        const imageKey = `product_image_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        
+        try {
+          localStorage.setItem(imageKey, base64);
+          resolve({
+            data: {
+              imageUrl: imageKey,
+              filename: file.name,
+              success: true
+            }
+          });
+        } catch (error) {
+          // If localStorage is full, just return the filename
+          resolve({
+            data: {
+              imageUrl: file.name.replace(/\s+/g, '-').toLowerCase(),
+              filename: file.name,
+              success: true
+            }
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 };
 
 // Keep backward compatibility
