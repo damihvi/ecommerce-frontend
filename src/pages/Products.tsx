@@ -46,13 +46,18 @@ const Products: React.FC = () => {
       if (searchTerm) params.search = searchTerm;
       
       const response = await productsAPI.getAll(params);
+      
+      // The API returns { success, message, data } structure
+      const products = response.data.data || response.data;
+      
       // Filter active products and convert price from string to number
-      const processedData = response.data
+      const processedData = products
         .filter((product: any) => product.isActive) // Client-side filter for active products
         .map((product: any) => ({
           ...product,
           price: parseFloat(product.price)
         }));
+      
       return processedData;
     },
     retry: 1,
@@ -64,7 +69,8 @@ const Products: React.FC = () => {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await categoriesAPI.getActive();
-      return response.data;
+      // The API returns { success, message, data } structure
+      return response.data.data || response.data;
     },
     retry: 1,
     retryDelay: 1000,
