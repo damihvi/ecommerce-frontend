@@ -56,26 +56,41 @@ const Home: React.FC = () => {
     queryKey: ['featured-products'],
     queryFn: async () => {
       try {
-        const response = await productsAPI.getFeatured();
-        const data = response.data;
-        // Ensure we always return an array
-        return Array.isArray(data) ? data : [];
-      } catch (error: any) {
-        console.error('Error fetching featured products:', error);
+        const response = await productsAPI.getAll();
+        console.log('Products API Response:', response); // Debug log
         
-        // If it's a 500 error, return empty array to prevent app crash
-        if (error.response?.status === 500) {
-          console.warn('Backend returning 500 - using fallback empty products');
-          return [];
+        let products = [];
+        
+        // Handle different response structures
+        if (response.data) {
+          if (response.data.data && Array.isArray(response.data.data)) {
+            // Structure: { data: { data: [...] } }
+            products = response.data.data;
+          } else if (Array.isArray(response.data)) {
+            // Structure: { data: [...] }
+            products = response.data;
+          } else if (response.data.products && Array.isArray(response.data.products)) {
+            // Structure: { data: { products: [...] } }
+            products = response.data.products;
+          }
         }
         
-        // For other errors, still return empty array but log the issue
+        console.log('Processed products:', products); // Debug log
+        
+        // Filter active products and take first 4
+        const activeProducts = products.filter((product: any) => 
+          product && (product.isActive !== false) && product.stock > 0
+        );
+        
+        return activeProducts.slice(0, 4);
+      } catch (error: any) {
+        console.error('Error fetching featured products:', error);
         return [];
       }
     },
     // Retry failed requests
-    retry: 2,
-    retryDelay: 1000,
+    retry: 1,
+    retryDelay: 2000,
     // Cache for 5 minutes
     staleTime: 5 * 60 * 1000,
   });
@@ -230,14 +245,42 @@ const Home: React.FC = () => {
           </div>
           
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="card-modern animate-pulse">
-                  <div className="h-48 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl mb-4"></div>
-                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded mb-2"></div>
-                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-2/3"></div>
+            <div className="text-center py-12">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 max-w-2xl mx-auto">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
                 </div>
-              ))}
+                <h3 className="text-xl font-semibold text-blue-800 mb-2">
+                  Cargando productos destacados...
+                </h3>
+                <p className="text-blue-700">
+                  Conectando con la base de datos para traer los mejores productos.
+                </p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-8 max-w-2xl mx-auto">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-red-800 mb-2">
+                  Error al cargar productos
+                </h3>
+                <p className="text-red-700 mb-4">
+                  Hubo un problema al conectar con el servidor. Por favor, intenta recargar la página.
+                </p>
+                <button 
+                  onClick={() => window.location.reload()} 
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Recargar Página
+                </button>
+              </div>
             </div>
           ) : featuredProducts && featuredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -245,23 +288,26 @@ const Home: React.FC = () => {
                 <div key={product.id} className="card-modern group hover:shadow-2xl transition-all duration-300">
                   <div className="relative overflow-hidden rounded-xl mb-4">
                     <img
-                      src={product.imageUrl || '/api/placeholder/300/200'}
+                      src={product.imageUrl ? productsAPI.getImageUrl(product.imageUrl) : '/api/placeholder/300/200'}
                       alt={product.name}
                       className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/api/placeholder/300/200';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
-                  <h3 className="text-lg font-semibold text-dark-800 mb-2 group-hover:text-primary-600 transition-colors">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-orange-500 transition-colors">
                     {product.name}
                   </h3>
-                  <p className="text-dark-600 mb-3 text-sm">
+                  <p className="text-gray-600 mb-3 text-sm">
                     {product.description?.substring(0, 100)}...
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-primary-600">
+                    <span className="text-2xl font-bold text-orange-500">
                       ${product.price}
                     </span>
-                    <button className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-4 py-2 rounded-xl hover:from-primary-600 hover:to-secondary-600 transition-all duration-200 font-medium">
+                    <button className="bg-black text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition-all duration-200 font-medium">
                       Ver Más
                     </button>
                   </div>
