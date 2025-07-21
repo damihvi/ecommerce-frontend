@@ -197,7 +197,7 @@ const Services: React.FC = () => {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Seguridad</h3>
             <p className="text-gray-600 mb-4">
-              Datos encriptados con SSl
+              Datos encriptados 
             </p>
             <ul className="text-sm text-gray-500 space-y-1">
               <li>• Encriptación SSL</li>
@@ -213,7 +213,7 @@ const Services: React.FC = () => {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Garantía de Calidad</h3>
             <p className="text-gray-600 mb-4">
-              Cambiar todo lo que tenia fue una molestia.
+              Espero que todo sirva
             </p>
             <ul className="text-sm text-gray-500 space-y-1">
               <li>• Productos certificados</li>
@@ -241,11 +241,11 @@ const Services: React.FC = () => {
         </div>
 
         {/* Premium Services */}
-        <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white rounded-lg p-8 mb-12">
+        <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-lg p-8 mb-12">
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-4">Servicios Premium</h2>
             <p className="text-xl mb-8 opacity-90">
-              Todo ecommerce tiene una suscripción premium, yo trabaje en uno durante 1 año y 3 meses y se como funciona, no copie a nadie :).  
+              Todo ecommerce tiene una suscripción premium, se parte de ello 
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white bg-opacity-20 rounded-lg p-6">
@@ -279,7 +279,7 @@ const Services: React.FC = () => {
             <button 
               onClick={handlePremiumSubscription}
               disabled={isLoading}
-              className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold mt-8 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold mt-8 hover:bg-orange-600 transition-colors disabled:opacity-50"
             >
               {isLoading ? 'Procesando...' : 'Únete Ahora'}
             </button>
@@ -316,7 +316,7 @@ const Services: React.FC = () => {
                   <p className="text-gray-600 text-sm mb-2">{product.description}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-primary-600">${product.price}</span>
-                    <button className="bg-primary-600 text-white px-4 py-2 rounded text-sm hover:bg-primary-700 transition-colors">
+                    <button className="bg-black text-white px-4 py-2 rounded text-sm hover:bg-gray-800 transition-colors">
                       Detalles
                     </button>
                   </div>
@@ -334,8 +334,8 @@ const Services: React.FC = () => {
               {testimonials.map((testimonial: any) => (
                 <div key={testimonial.id} className="bg-gray-50 rounded-lg p-6">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                      <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
@@ -351,7 +351,7 @@ const Services: React.FC = () => {
                     </div>
                   </div>
                   <p className="text-gray-600 mb-2">"{testimonial.text}"</p>
-                  <p className="text-sm text-primary-600 font-medium">Servicio: {testimonial.service}</p>
+                  <p className="text-sm text-orange-400 font-medium">Servicio: {testimonial.service}</p>
                 </div>
               ))}
             </div>
@@ -364,7 +364,7 @@ const Services: React.FC = () => {
           <div className="space-y-6">
             <div className="border-b border-gray-200 pb-4">
               <h3 className="font-semibold text-gray-900 mb-2">¿Cuál es el tiempo de entrega?</h3>
-              <p className="text-gray-600">Este semestre se sintió más largo de lo normal,toda una experiencia estresante.</p>
+              <p className="text-gray-600">Este semestre se sintió más largo de lo normal.</p>
             </div>
             <div className="border-b border-gray-200 pb-4">
               <h3 className="font-semibold text-gray-900 mb-2">¿Se puede devolver un producto?</h3>
@@ -376,11 +376,11 @@ const Services: React.FC = () => {
             </div>
             <div className="border-b border-gray-200 pb-4">
               <h3 className="font-semibold text-gray-900 mb-2">¿Cómo puedo rastrear mi pedido?</h3>
-              <p className="text-gray-600">pero me tocó cambiar todo por la desconfianza del profesor.</p>
+              <p className="text-gray-600">Tailwind esta mejor que bootstrap.</p>
             </div>
             <div className="pb-4">
               <h3 className="font-semibold text-gray-900 mb-2">¿Qué incluye la membresía Premium?</h3>
-              <p className="text-gray-600">En fin spider-man la cabra de todo marvel.</p>
+              <p className="text-gray-600">spider-man la cabra de todo marvel.</p>
             </div>
           </div>
         </div>

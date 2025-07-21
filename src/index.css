@@ -9,7 +9,7 @@
   }
   
   body {
-    @apply bg-gradient-to-br from-slate-50 via-white to-slate-100 font-sans;
+    @apply bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans;
     margin: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -30,13 +30,13 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out;
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2 px-4 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out;
     @apply sm:py-2 sm:px-4 md:py-2.5 md:px-5;
     @apply text-sm sm:text-base;
   }
   
   .btn-secondary {
-    @apply bg-gradient-to-r from-secondary-500 to-secondary-600 hover:from-secondary-600 hover:to-secondary-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out;
+    @apply bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out;
   }
   
   .card-modern {
@@ -48,7 +48,7 @@
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-primary-600 via-secondary-500 to-accent-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-orange-600 via-gray-700 to-black bg-clip-text text-transparent;
   }
   
   .shimmer {

@@ -30,31 +30,31 @@ const Navigation: React.FC = () => {
   const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
     <Link
       to={to}
-      className={`relative px-4 py-2 text-lg font-medium rounded-xl transition-all duration-200 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 ${
+      className={`relative px-4 py-2 text-lg font-medium rounded-xl transition-all duration-200 hover:bg-gray-800/10 ${
         isActive(to) 
-          ? 'text-primary-600 bg-gradient-to-r from-primary-50 to-secondary-50' 
-          : 'text-dark-600 hover:text-primary-600'
+          ? 'text-orange-500 bg-gray-800/5' 
+          : 'text-gray-800 hover:text-orange-500'
       }`}
     >
       {children}
       {isActive(to) && (
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full"></div>
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-orange-500 rounded-full"></div>
       )}
     </Link>
   );
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md shadow-xl border-b border-white/20 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
+    <nav className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200 sticky top-0 z-50 w-full max-w-full overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex justify-between items-center h-20 w-full gap-4">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <Link to="/" className="flex-shrink-0 flex items-center group">
               <div className="relative">
-                <span className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold gradient-text">
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-black">
                   Damihvi
                 </span>
-                <div className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                <div className="absolute -bottom-1 left-0 w-full h-1 bg-orange-500 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               </div>
             </Link>
           </div>
@@ -72,10 +72,10 @@ const Navigation: React.FC = () => {
               <>
                 <Link
                   to="/cart"
-                  className={`relative px-4 py-2 text-lg font-medium rounded-xl transition-all duration-200 hover:bg-gradient-to-r hover:from-primary-50 hover:to-secondary-50 ${
+                  className={`relative px-4 py-2 text-lg font-medium rounded-xl transition-all duration-200 hover:bg-gray-800/10 ${
                     isActive('/cart') 
-                      ? 'text-primary-600 bg-gradient-to-r from-primary-50 to-secondary-50' 
-                      : 'text-dark-600 hover:text-primary-600'
+                      ? 'text-orange-500 bg-gray-800/5' 
+                      : 'text-gray-800 hover:text-orange-500'
                   }`}
                 >
                   <div className="flex items-center space-x-2">
@@ -83,13 +83,13 @@ const Navigation: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8L5 3H3m4 10v6a2 2 0 002 2h8a2 2 0 002-2v-6" />
                     </svg>
                     {totalItems > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-pulse">
+                      <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-pulse">
                         {totalItems}
                       </span>
                     )}
                   </div>
                   {isActive('/cart') && (
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full"></div>
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-orange-500 rounded-full"></div>
                   )}
                 </Link>
                 <NavLink to="/admin">Admin</NavLink>
@@ -134,7 +134,7 @@ const Navigation: React.FC = () => {
                   to="/profile"
                   className="flex items-center space-x-2 px-3 py-2 text-dark-600 hover:text-primary-600 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">
                       {user?.firstName?.charAt(0).toUpperCase() || 
                        user?.name?.charAt(0).toUpperCase() || 
@@ -175,7 +175,7 @@ const Navigation: React.FC = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm"
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm"
                 >
                   Registrarse
                 </Link>
@@ -188,7 +188,7 @@ const Navigation: React.FC = () => {
             {/* Mobile Search Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-xl text-dark-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 mr-2"
+              className="inline-flex items-center justify-center p-2 rounded-xl text-gray-800 hover:text-orange-500 hover:bg-gray-100 transition-all duration-200 mr-2"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

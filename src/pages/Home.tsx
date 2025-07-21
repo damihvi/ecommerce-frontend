@@ -173,7 +173,7 @@ const Home: React.FC = () => {
               ¿Por qué elegir Damihvi's Ecommerce?
             </h2>
             <p className="text-xl text-dark-600 max-w-2xl mx-auto">
-              Un proyecto que tuve que cambiar todo en 3 dias :)
+              Un proyecto de final de semestre
             </p>
           </div>
           
@@ -208,9 +208,9 @@ const Home: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-semibold text-dark-800 mb-4">Soporte 24/7</h3>
+              <h3 className="text-2xl font-semibold text-dark-800 mb-4">Soporte</h3>
               <p className="text-dark-600">
-                todo mi fin de semana se fue en cambiar todo :) 
+                Me demore en hacer bien los hooks
               </p>
             </div>
           </div>
