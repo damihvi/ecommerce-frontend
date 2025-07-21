@@ -174,12 +174,12 @@ const Cart: React.FC = () => {
               </div>
               
               <div className="mt-6 space-y-3">
-                <button
-                  className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
-                  onClick={() => alert('Checkout functionality not implemented yet')}
+                <Link
+                  to="/checkout"
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-medium transition-colors text-center block"
                 >
-                  Proceed to Checkout
-                </button>
+                  Proceder al Checkout
+                </Link>
                 
                 <Link
                   to="/products"
