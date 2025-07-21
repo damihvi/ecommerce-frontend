@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useProducts from '../hooks/useProducts';
-import useCategories from '../hooks/useCategories';
+import { useCategories } from '../hooks/useCategories';
 import ImageUpload from './ImageUpload';
 import { productsAPI } from '../services/api';
 
