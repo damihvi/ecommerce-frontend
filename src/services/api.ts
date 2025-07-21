@@ -66,7 +66,13 @@ export const productsAPI = {
   getAll: (params?: any) => apiClient.get('/products', { params }),
   getById: (id: string) => apiClient.get(`/products/${id}`),
   getFeatured: () => apiClient.get('/products'),
-  getImageUrl: (imagePath: string) => `${API_BASE_URL}/uploads/${imagePath}`,
+  getImageUrl: (imagePath: string) => {
+    if (!imagePath) {
+      return 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
+    }
+    // Primero intentamos con la ruta del API
+    return `${API_BASE_URL}/uploads/${imagePath}`;
+  },
   create: (productData: any) => apiClient.post('/products', productData),
   update: (id: string, productData: any) => apiClient.put(`/products/${id}`, productData),
   delete: (id: string) => apiClient.delete(`/products/${id}`),

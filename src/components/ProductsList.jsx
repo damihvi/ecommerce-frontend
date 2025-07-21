@@ -6,12 +6,12 @@ import { productsAPI } from '../services/api';
 
 // Helper function to get the correct image URL
 const getProductImageUrl = (imageUrl) => {
-  if (!imageUrl) return '';
+  if (!imageUrl) return 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
   
   // If it's a localStorage key (starts with 'product_image_')
   if (imageUrl.startsWith('product_image_')) {
     const storedImage = localStorage.getItem(imageUrl);
-    return storedImage || '';
+    return storedImage || 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
   }
   
   // If it's already a full URL

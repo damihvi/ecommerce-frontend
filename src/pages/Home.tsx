@@ -288,11 +288,11 @@ const Home: React.FC = () => {
                 <div key={product.id} className="card-modern group hover:shadow-2xl transition-all duration-300">
                   <div className="relative overflow-hidden rounded-xl mb-4">
                     <img
-                      src={product.imageUrl ? productsAPI.getImageUrl(product.imageUrl) : '/api/placeholder/300/200'}
+                      src={product.imageUrl ? productsAPI.getImageUrl(product.imageUrl) : 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen'}
                       alt={product.name}
                       className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/api/placeholder/300/200';
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -301,7 +301,7 @@ const Home: React.FC = () => {
                     {product.name}
                   </h3>
                   <p className="text-gray-600 mb-3 text-sm">
-                    {product.description?.substring(0, 100)}...
+                    {product.description?.substring(0, 100) || 'Sin descripción disponible'}...
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-bold text-orange-500">
