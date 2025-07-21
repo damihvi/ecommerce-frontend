@@ -245,6 +245,5 @@ function useProducts() {
   };
 }
 
-// Exportaciones
 export { useProducts };
 export default useProducts;
