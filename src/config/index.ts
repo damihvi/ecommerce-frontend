@@ -12,7 +12,7 @@ export const config = {
   VERSION: '1.0.0',
   
   // Timeout settings
-  API_TIMEOUT: 90000, // 90 seconds for Render cold start (increased from 45s)
+  API_TIMEOUT: 120000, // 120 seconds for Render cold start (increased from 90s)
   
   // Upload settings
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB

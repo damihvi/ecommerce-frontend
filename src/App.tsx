@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -19,11 +19,26 @@ import Services from './pages/Services';
 import Blog from './pages/Blog';
 import Profile from './pages/Profile';
 import AdminDashboardSimple from './pages/AdminDashboard.simple';
+import { apiClient } from './services/api';
 
 // Create a query client
 const queryClient = new QueryClient();
 
+// Function to wake up the backend
+const wakeUpBackend = async () => {
+  try {
+    await apiClient.get('/health', { timeout: 5000 });
+    console.log('Backend is awake');
+  } catch (error) {
+    console.log('Backend warming up...');
+  }
+};
+
 function App() {
+  // Wake up backend on app load
+  useEffect(() => {
+    wakeUpBackend();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

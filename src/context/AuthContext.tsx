@@ -83,7 +83,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Better error handling for timeout and connection issues
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('El servidor está iniciando. Esto puede tomar unos minutos en el primer acceso. Por favor, intenta nuevamente.');
+      } else if (error.response?.status === 401) {
+        throw new Error('Credenciales incorrectas');
+      } else if (error.response?.status >= 500) {
+        throw new Error('Error del servidor. Por favor, intenta más tarde.');
+      } else if (!error.response) {
+        throw new Error('No se puede conectar al servidor. Verifica tu conexión a internet.');
+      }
       throw error;
     }
   };
