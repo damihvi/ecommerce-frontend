@@ -2,11 +2,11 @@
 // ===============================
 
 // URL base del backend
-const API_BASE_URL = 'https://nestjs-ecommerce-backend-api.desarrollo-software.xyz/api'
+const API_BASE_URL = 'https://damihvi.onrender.com/api'
 
 // Credenciales del admin
 const ADMIN_CREDENTIALS = {
-  identifier: 'admin@ecommerce.com', // Campo correcto para login
+  email: 'admin@test.com', // Campo correcto para login
   password: 'admin123'
 }
 
@@ -17,14 +17,14 @@ fetch(`${API_BASE_URL}/auth/login`, {
   headers: { 'Content-Type': 'application/json' },
   credentials: 'include', // Importante para CORS
   body: JSON.stringify({
-    identifier: 'admin@ecommerce.com',
+    email: 'admin@test.com',
     password: 'admin123'
   })
 })
 */
 
 // NOTAS IMPORTANTES:
-// - El campo para login es 'identifier', NO 'email'
+// - El campo para login es 'email', NO 'identifier'
 // - Se requiere withCredentials: true para CORS
 // - El admin tiene permisos para acceder a /admin/products
 // - Los roles disponibles son: 'ADMIN' | 'USER'

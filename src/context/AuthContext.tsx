@@ -14,7 +14,7 @@ interface User {
 }
 
 interface LoginCredentials {
-  identifier: string;
+  email: string;
   password: string;
 }
 
@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await authAPI.login({
-        identifier: credentials.identifier,
+        email: credentials.email,
         password: credentials.password
       });
 
