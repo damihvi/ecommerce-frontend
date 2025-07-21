@@ -97,6 +97,9 @@ const AdminDashboard: React.FC = () => {
       setIsCategoryModalOpen(false);
       toast.success('Categoría creada exitosamente');
     },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to create category');
+    }
   });
   
   const updateCategoryMutation = useMutation({
@@ -108,6 +111,9 @@ const AdminDashboard: React.FC = () => {
       setEditingCategory(null);
       toast.success('Categoría actualizada exitosamente');
     },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update category');
+    }
   });
   // Manejadores de formularios
   const handleCategorySubmit = async (e: React.FormEvent) => {
