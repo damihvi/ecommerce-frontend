@@ -9,7 +9,6 @@ import { useCategories } from '../hooks/useCategories';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsAPI, categoriesAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import ImageUpload from '../components/ImageUpload';
 
 interface Product {
   id: string;

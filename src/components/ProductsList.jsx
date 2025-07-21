@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
-import ImageUpload from './ImageUpload';
-import { productsAPI } from '../services/api';
-
-// Helper function to get the correct image URL
-const getProductImageUrl = (imageUrl) => {
-  return productsAPI.getImageUrl(imageUrl);
-};
 
 export default function ProductsList() {
   const {
@@ -18,8 +11,7 @@ export default function ProductsList() {
     fetchProducts,
     createProduct,
     updateProduct,
-    deleteProduct,
-    toggleProductActive
+    deleteProduct
   } = useProducts();
 
   const { categories } = useCategories();
@@ -143,23 +135,10 @@ export default function ProductsList() {
               {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                      {product.imageUrl ? (
-                        <img
-                          src={getProductImageUrl(product.imageUrl)}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <div className={`flex items-center justify-center w-full h-full ${product.imageUrl ? 'hidden' : ''}`}>
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -186,27 +165,6 @@ export default function ProductsList() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      {/* Toggle Active/Inactive */}
-                      <button
-                        onClick={() => toggleProductActive(product.id)}
-                        className={`px-3 py-2 rounded-lg transition-colors ${
-                          product.isActive
-                            ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                            : 'bg-green-100 text-green-600 hover:bg-green-200'
-                        }`}
-                        title={product.isActive ? 'Desactivar producto' : 'Activar producto'}
-                      >
-                        {product.isActive ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </button>
-                      
                       {/* Edit Button */}
                       <button
                         onClick={() => handleEdit(product)}
@@ -273,14 +231,6 @@ export default function ProductsList() {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Imagen del Producto</label>
-                  <ImageUpload
-                    onImageUploaded={(imageUrl) => setFormData({ ...formData, imageUrl })}
-                    currentImageUrl={formData.imageUrl}
-                    className="w-full"
                   />
                 </div>
                 <div>
