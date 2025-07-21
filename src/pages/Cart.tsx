@@ -162,13 +162,13 @@ const Cart: React.FC = () => {
                 
                 <div className="flex justify-between text-sm">
                   <span>Tax</span>
-                  <span>${(totalPrice * 0.1).toFixed(2)}</span>
+                  <span>${(totalPrice * 0.15).toFixed(2)}</span>
                 </div>
                 
                 <div className="border-t pt-3">
                   <div className="flex justify-between text-base font-medium">
                     <span>Total</span>
-                    <span>${(totalPrice * 1.1).toFixed(2)}</span>
+                    <span>${(totalPrice * 1.15).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
