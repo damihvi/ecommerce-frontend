@@ -18,7 +18,7 @@ import Contact from './pages/Contact';
 import Services from './pages/Services';
 import Blog from './pages/Blog';
 import Profile from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboardSimple from './pages/AdminDashboard.simple';
 
 // Create a query client
 const queryClient = new QueryClient();
@@ -44,8 +44,8 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/admin/products" element={<AdminDashboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/products" element={<AdminDashboardSimple />} />
+                <Route path="/admin" element={<AdminDashboardSimple />} />
               </Routes>
               <Footer />
               <Toaster
