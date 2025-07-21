@@ -68,9 +68,9 @@ export const productsAPI = {
   getFeatured: () => apiClient.get('/products'),
   getImageUrl: (imagePath: string) => {
     if (!imagePath) {
-      return 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
+      // Simple gray placeholder using CSS gradients - no external requests
+      return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlbjwvdGV4dD48L3N2Zz4=';
     }
-    // Primero intentamos con la ruta del API
     return `${API_BASE_URL}/uploads/${imagePath}`;
   },
   create: (productData: any) => apiClient.post('/products', productData),

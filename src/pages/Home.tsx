@@ -1,99 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { API_BASE_URL, productsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
-  const [backendStatus, setBackendStatus] = useState<string>('Checking...');
   const { loading } = useAuth();
-
-  useEffect(() => {
-    // Test backend connection
-    const testBackend = async () => {
-      try {
-        console.log('Testing backend connection to:', `${API_BASE_URL}/products`);
-        
-        // Use the API client that's already configured
-        const response = await productsAPI.getAll();
-        
-        console.log('Backend response:', response);
-        
-        if (response.data) {
-          setBackendStatus('✅ Backend conectado exitosamente');
-        } else {
-          setBackendStatus('❌ Backend no retorna datos');
-        }
-      } catch (error) {
-        console.error('Backend connection error:', error);
-        
-        // Check the error type
-        const axiosError = error as any; // Cast to any to access axios error properties
-        
-        if (axiosError.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          if (axiosError.response.status === 401) {
-            setBackendStatus('✅ Backend conectado (requiere autenticación)');
-          } else {
-            setBackendStatus(`⚠️ Backend responde con status ${axiosError.response.status}`);
-          }
-        } else if (axiosError.request) {
-          // The request was made but no response was received
-          setBackendStatus('❌ Backend no responde - Verificar conexión');
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          setBackendStatus('❌ Error de configuración de la petición');
-        }
-      }
-    };
-
-    testBackend();
-  }, []);
-
-  // Fetch featured products with better error handling
-  const { data: featuredProducts, isLoading, error } = useQuery({
-    queryKey: ['featured-products'],
-    queryFn: async () => {
-      try {
-        const response = await productsAPI.getAll();
-        console.log('Products API Response:', response); // Debug log
-        
-        let products = [];
-        
-        // Handle different response structures
-        if (response.data) {
-          if (response.data.data && Array.isArray(response.data.data)) {
-            // Structure: { data: { data: [...] } }
-            products = response.data.data;
-          } else if (Array.isArray(response.data)) {
-            // Structure: { data: [...] }
-            products = response.data;
-          } else if (response.data.products && Array.isArray(response.data.products)) {
-            // Structure: { data: { products: [...] } }
-            products = response.data.products;
-          }
-        }
-        
-        console.log('Processed products:', products); // Debug log
-        
-        // Filter active products and take first 4
-        const activeProducts = products.filter((product: any) => 
-          product && (product.isActive !== false) && product.stock > 0
-        );
-        
-        return activeProducts.slice(0, 4);
-      } catch (error: any) {
-        console.error('Error fetching featured products:', error);
-        return [];
-      }
-    },
-    // Retry failed requests
-    retry: 1,
-    retryDelay: 2000,
-    // Cache for 5 minutes
-    staleTime: 5 * 60 * 1000,
-  });
 
   // Show loading state
   if (loading) {
@@ -130,15 +40,6 @@ const Home: React.FC = () => {
               <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
                 Descubre productos increíbles con experiencias únicas en mi proyecto de final de semestre.
               </p>
-              
-              {/* Backend Status Indicator */}
-              <div className="inline-flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-4">
-                <div className={`w-2 h-2 rounded-full mr-2 ${
-                  backendStatus.includes('✅') ? 'bg-green-400' : 
-                  backendStatus.includes('❌') ? 'bg-red-400' : 'bg-yellow-400 animate-pulse'
-                }`}></div>
-                <span className="text-white/90 text-sm">{backendStatus}</span>
-              </div>
             </div>
             
             {/* Action Buttons */}
@@ -160,13 +61,6 @@ const Home: React.FC = () => {
               >
                 Conoce Más
               </Link>
-            </div>
-
-            {/* Backend Status */}
-            <div className="w-full max-w-md mx-auto">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 w-full">
-                <p className="text-white/90 font-medium text-center">{backendStatus}</p>
-              </div>
             </div>
           </div>
         </div>
@@ -228,124 +122,6 @@ const Home: React.FC = () => {
                 Me demore en hacer bien los hooks
               </p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Featured Products Section */}
-      <div className="py-20 bg-gradient-to-b from-light-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-display font-bold text-dark-800 mb-4">
-              Productos Destacados
-            </h2>
-            <p className="text-xl text-dark-600">
-              Productos mas pedidos:
-            </p>
-          </div>
-          
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-8 max-w-2xl mx-auto">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-blue-800 mb-2">
-                  Cargando productos destacados...
-                </h3>
-                <p className="text-blue-700">
-                  Conectando con la base de datos para traer los mejores productos.
-                </p>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <div className="bg-red-50 border border-red-200 rounded-xl p-8 max-w-2xl mx-auto">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-red-800 mb-2">
-                  Error al cargar productos
-                </h3>
-                <p className="text-red-700 mb-4">
-                  Hubo un problema al conectar con el servidor. Por favor, intenta recargar la página.
-                </p>
-                <button 
-                  onClick={() => window.location.reload()} 
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Recargar Página
-                </button>
-              </div>
-            </div>
-          ) : featuredProducts && featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.isArray(featuredProducts) && featuredProducts.slice(0, 4).map((product: any) => (
-                <div key={product.id} className="card-modern group hover:shadow-2xl transition-all duration-300">
-                  <div className="relative overflow-hidden rounded-xl mb-4">
-                    <img
-                      src={product.imageUrl ? productsAPI.getImageUrl(product.imageUrl) : 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen'}
-                      alt={product.name}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-orange-500 transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-600 mb-3 text-sm">
-                    {product.description?.substring(0, 100) || 'Sin descripción disponible'}...
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-orange-500">
-                      ${product.price}
-                    </span>
-                    <button className="bg-black text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition-all duration-200 font-medium">
-                      Ver Más
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 max-w-2xl mx-auto">
-                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-yellow-800 mb-2">
-                  Productos no disponibles temporalmente
-                </h3>
-                <p className="text-yellow-700 mb-4">
-                  El backend está iniciando o hay un problema temporal con la base de datos. 
-                  Los productos destacados aparecerán pronto.
-                </p>
-                <div className="text-sm text-yellow-600">
-                  <p>Estado del backend: <span className="font-medium">{backendStatus}</span></p>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div className="text-center mt-12">
-            <Link
-              to="/products"
-              className="btn-primary inline-flex items-center space-x-2"
-            >
-              <span>Ver Todos los Productos</span>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
           </div>
         </div>
       </div>

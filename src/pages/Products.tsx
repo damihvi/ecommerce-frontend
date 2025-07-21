@@ -6,20 +6,6 @@ import { useCart } from '../context/CartContext';
 
 // Helper function to get the correct image URL
 const getProductImageUrl = (imageUrl: string): string => {
-  if (!imageUrl) return 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
-  
-  // If it's a localStorage key (starts with 'product_image_')
-  if (imageUrl.startsWith('product_image_')) {
-    const storedImage = localStorage.getItem(imageUrl);
-    return storedImage || 'https://via.placeholder.com/300x200/f3f4f6/6b7280?text=Sin+Imagen';
-  }
-  
-  // If it's already a full URL
-  if (imageUrl.startsWith('http') || imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
-    return imageUrl;
-  }
-  
-  // Otherwise, construct backend URL
   return productsAPI.getImageUrl(imageUrl);
 };
 
