@@ -374,19 +374,6 @@ const Profile: React.FC = () => {
                         🔒 Cambiar
                       </button>
                     </div>
-                    
-                    <div className="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">Autenticación de Dos Factores</h4>
-                        <p className="text-sm text-gray-600">Próximamente - Añade una capa extra de seguridad a tu cuenta</p>
-                      </div>
-                      <button 
-                        disabled
-                        className="text-gray-400 font-medium cursor-not-allowed"
-                      >
-                        Configurar
-                      </button>
-                    </div>
                   </div>
                 </div>
               </>
