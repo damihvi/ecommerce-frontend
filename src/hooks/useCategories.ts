@@ -15,7 +15,7 @@ interface Pagination {
   itemsPerPage: number;
 }
 
-export function useCategories() {
+function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -214,4 +214,6 @@ export function useCategories() {
   };
 }
 
+// Exportaciones
+export { useCategories };
 export default useCategories;

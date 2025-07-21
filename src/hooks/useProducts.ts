@@ -24,7 +24,7 @@ interface Product {
   featured?: boolean;
 }
 
-export function useProducts() {
+function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -245,4 +245,6 @@ export function useProducts() {
   };
 }
 
+// Exportaciones
+export { useProducts };
 export default useProducts;
