@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProducts } from '../hooks/useProducts';
+import useProducts from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
 
 export default function ProductsList() {
