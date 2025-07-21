@@ -10,7 +10,7 @@ const ADMIN_CREDENTIALS = {
   password: 'admin123'
 }
 
-// Ejemplo de login con fetch
+//login con fetch
 /*
 fetch(`${API_BASE_URL}/auth/login`, {
   method: 'POST',
