@@ -142,6 +142,28 @@ export default function ProductsList() {
     }
   };
 
+  const toggleProductStatus = async (productId, currentStatus) => {
+    try {
+      const response = await fetch(`https://damihvi.onrender.com/api/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isActive: !currentStatus
+        }),
+      });
+
+      if (response.ok) {
+        await fetchProducts();
+      } else {
+        setError('Error al cambiar estado del producto');
+      }
+    } catch (err) {
+      setError('Error de conexión');
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -194,6 +216,7 @@ export default function ProductsList() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
               </tr>
             </thead>
@@ -208,7 +231,24 @@ export default function ProductsList() {
                       ? product.category.name 
                       : product.category || 'Sin categoría'}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {product.isActive ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button 
+                      onClick={() => toggleProductStatus(product.id, product.isActive)}
+                      className={`mr-2 px-2 py-1 text-xs rounded ${
+                        product.isActive 
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      }`}
+                    >
+                      {product.isActive ? 'Desactivar' : 'Activar'}
+                    </button>
                     <button 
                       onClick={() => handleEdit(product)}
                       className="text-indigo-600 hover:text-indigo-900 mr-2"

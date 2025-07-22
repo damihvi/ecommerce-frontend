@@ -189,6 +189,35 @@ const UsersList: React.FC = () => {
     }
   };
 
+  const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`https://damihvi.onrender.com/api/users/${userId}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          isActive: !currentStatus
+        }),
+      });
+
+      if (response.ok) {
+        fetchUsers();
+      } else {
+        setError('Error al cambiar estado del usuario');
+      }
+    } catch (err) {
+      setError('Error de conexión');
+    }
+  };
+
   const openCreateModal = () => {
     setEditingUser(null);
     setFormData({ email: '', username: '', password: '', role: 'user', isActive: true });
@@ -255,6 +284,16 @@ const UsersList: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => toggleUserStatus(user.id, user.isActive)}
+                      className={`mr-2 px-2 py-1 text-xs rounded ${
+                        user.isActive 
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      }`}
+                    >
+                      {user.isActive ? 'Desactivar' : 'Activar'}
+                    </button>
                     <button
                       onClick={() => handleEdit(user)}
                       className="text-indigo-600 hover:text-indigo-900 mr-4"

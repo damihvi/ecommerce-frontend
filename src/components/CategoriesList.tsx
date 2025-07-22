@@ -129,6 +129,28 @@ const CategoriesList: React.FC = () => {
     }
   };
 
+  const toggleCategoryStatus = async (categoryId: string, currentStatus: boolean) => {
+    try {
+      const response = await fetch(`https://damihvi.onrender.com/api/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isActive: !currentStatus
+        }),
+      });
+
+      if (response.ok) {
+        await fetchCategories();
+      } else {
+        setError('Error al cambiar estado de la categoría');
+      }
+    } catch (err) {
+      setError('Error de conexión');
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -201,6 +223,16 @@ const CategoriesList: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button 
+                      onClick={() => toggleCategoryStatus(category.id, category.isActive ?? false)}
+                      className={`mr-2 px-2 py-1 text-xs rounded ${
+                        category.isActive 
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      }`}
+                    >
+                      {category.isActive ? 'Desactivar' : 'Activar'}
+                    </button>
                     <button 
                       onClick={() => handleEdit(category)}
                       className="text-indigo-600 hover:text-indigo-900 mr-2"
