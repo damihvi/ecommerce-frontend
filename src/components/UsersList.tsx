@@ -14,13 +14,22 @@ const UsersList: React.FC = () => {
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ email: '', role: 'user' as 'user' | 'admin', isActive: true });
+  const [formData, setFormData] = useState({ 
+    email: '', 
+    username: '',
+    password: '',
+    role: 'user' as 'user' | 'admin', 
+    isActive: true 
+  });
   const { user: currentUser } = useAuth();
 
   const fetchUsers = async () => {
     setLoading(true);
+    setError('');
     try {
       const token = localStorage.getItem('token');
+      console.log('Fetching users with token:', token ? 'Present' : 'Missing');
+      
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
@@ -33,6 +42,8 @@ const UsersList: React.FC = () => {
         method: 'GET',
         headers
       });
+      
+      console.log('Users response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
@@ -48,21 +59,27 @@ const UsersList: React.FC = () => {
           setUsers([]);
         }
       } else {
-        throw new Error('Error al cargar usuarios');
+        const errorText = await response.text();
+        console.error('Users API error:', response.status, errorText);
+        throw new Error(`Error ${response.status}: ${errorText}`);
       }
     } catch (err) {
       console.error('Error fetching users:', err);
-      setError('Error de conexión');
+      setError('Error de conexión: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log('UsersList useEffect triggered, currentUser:', currentUser);
     if (currentUser?.role === 'admin') {
+      console.log('User is admin, fetching users...');
       fetchUsers();
+    } else {
+      console.log('User is not admin or not logged in');
     }
-  }, [currentUser]);
+  }, [currentUser?.role]); // Solo depender del rol, no de todo el objeto currentUser
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,19 +102,47 @@ const UsersList: React.FC = () => {
       
       const method = editingUser ? 'PUT' : 'POST';
 
+      // Preparar el body según si es creación o actualización
+      let bodyData: any;
+      if (editingUser) {
+        // Para actualización, solo enviar campos que pueden cambiar
+        bodyData = {
+          isActive: formData.isActive
+        };
+        // Solo incluir password si se proporcionó uno nuevo
+        if (formData.password.trim()) {
+          bodyData.password = formData.password;
+        }
+      } else {
+        // Para creación, enviar todos los campos obligatorios
+        bodyData = {
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          role: formData.role,
+          isActive: formData.isActive
+        };
+      }
+
+      console.log('Sending user data:', method, bodyData);
+
       const response = await fetch(url, {
         method,
         headers,
-        body: JSON.stringify(formData),
+        body: JSON.stringify(bodyData),
       });
+
+      console.log('User submit response status:', response.status);
 
       if (response.ok) {
         fetchUsers();
         setShowModal(false);
         setEditingUser(null);
-        setFormData({ email: '', role: 'user', isActive: true });
+        setFormData({ email: '', username: '', password: '', role: 'user', isActive: true });
       } else {
-        setError('Error al guardar usuario');
+        const errorText = await response.text();
+        console.error('User submit error:', response.status, errorText);
+        setError(`Error al guardar usuario: ${response.status} - ${errorText}`);
       }
     } catch (err) {
       setError('Error de conexión');
@@ -110,6 +155,8 @@ const UsersList: React.FC = () => {
     setEditingUser(user);
     setFormData({
       email: user.email,
+      username: user.email.split('@')[0], // Generar username del email como fallback
+      password: '', // No mostrar password existente
       role: user.role,
       isActive: user.isActive
     });
@@ -144,7 +191,7 @@ const UsersList: React.FC = () => {
 
   const openCreateModal = () => {
     setEditingUser(null);
-    setFormData({ email: '', role: 'user', isActive: true });
+    setFormData({ email: '', username: '', password: '', role: 'user', isActive: true });
     setShowModal(true);
   };
 
@@ -247,6 +294,32 @@ const UsersList: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  {editingUser ? 'Nueva Contraseña (opcional)' : 'Contraseña'}
+                </label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required={!editingUser}
                 />
               </div>
 
