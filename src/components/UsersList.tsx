@@ -30,7 +30,7 @@ const UsersList: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/users');
+      const response = await fetch('https://damihvi.onrender.com/api/users');
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
@@ -50,8 +50,8 @@ const UsersList: React.FC = () => {
     
     try {
       const url = editingUser 
-        ? `http://localhost:3001/api/users/${editingUser.id}`
-        : 'http://localhost:3001/api/users';
+        ? `https://damihvi.onrender.com/api/users/${editingUser.id}`
+        : 'https://damihvi.onrender.com/api/users';
       
       const method = editingUser ? 'PUT' : 'POST';
       
@@ -91,7 +91,7 @@ const UsersList: React.FC = () => {
   const handleDelete = async (userId: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
       try {
-        const response = await fetch(`http://localhost:3001/api/users/${userId}`, {
+        const response = await fetch(`https://damihvi.onrender.com/api/users/${userId}`, {
           method: 'DELETE',
         });
 

@@ -43,7 +43,7 @@ const CategoriesList: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/categories');
+      const response = await fetch('https://damihvi.onrender.com/api/categories');
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -63,8 +63,8 @@ const CategoriesList: React.FC = () => {
     
     try {
       const url = editingCategory 
-        ? `http://localhost:3001/api/categories/${editingCategory.id}`
-        : 'http://localhost:3001/api/categories';
+        ? `https://damihvi.onrender.com/api/categories/${editingCategory.id}`
+        : 'https://damihvi.onrender.com/api/categories';
       
       const method = editingCategory ? 'PUT' : 'POST';
       
@@ -103,7 +103,7 @@ const CategoriesList: React.FC = () => {
   const handleDelete = async (categoryId: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
       try {
-        const response = await fetch(`http://localhost:3001/api/categories/${categoryId}`, {
+        const response = await fetch(`https://damihvi.onrender.com/api/categories/${categoryId}`, {
           method: 'DELETE',
         });
 

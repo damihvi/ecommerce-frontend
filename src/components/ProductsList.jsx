@@ -22,7 +22,7 @@ export default function ProductsList() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/products');
+      const response = await fetch('https://damihvi.onrender.com/api/products');
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -42,8 +42,8 @@ export default function ProductsList() {
     
     try {
       const url = editingProduct 
-        ? `http://localhost:3001/api/products/${editingProduct.id}`
-        : 'http://localhost:3001/api/products';
+        ? `https://damihvi.onrender.com/api/products/${editingProduct.id}`
+        : 'https://damihvi.onrender.com/api/products';
       
       const method = editingProduct ? 'PUT' : 'POST';
       
@@ -88,7 +88,7 @@ export default function ProductsList() {
   const handleDelete = async (productId) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
       try {
-        const response = await fetch(`http://localhost:3001/api/products/${productId}`, {
+        const response = await fetch(`https://damihvi.onrender.com/api/products/${productId}`, {
           method: 'DELETE',
         });
 
