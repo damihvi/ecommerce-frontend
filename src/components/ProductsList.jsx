@@ -176,24 +176,7 @@ export default function ProductsList() {
         </div>
       )}
 
-      {/* Paginación */}
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center space-x-2 mt-4">
-          {Array.from({ length: pagination.totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => fetchProducts(i + 1)}
-              className={`px-3 py-1 border rounded ${
-                pagination.currentPage === i + 1
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-      )}
+
 
       {/* Modal de crear/editar producto */}
       {isModalOpen && (
