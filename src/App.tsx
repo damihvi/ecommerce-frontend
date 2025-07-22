@@ -18,7 +18,7 @@ import Contact from './pages/Contact';
 import Services from './pages/Services';
 import Blog from './pages/Blog';
 import Profile from './pages/Profile';
-import AdminDashboardSimple from './pages/AdminDashboard.simple';
+import AdminDashboard from './pages/AdminDashboard';
 import { apiClient } from './services/api';
 
 // Create a query client
@@ -59,8 +59,8 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/admin/products" element={<AdminDashboardSimple />} />
-                <Route path="/admin" element={<AdminDashboardSimple />} />
+                <Route path="/admin/products" element={<AdminDashboard />} />
+                <Route path="/admin" element={<AdminDashboard />} />
               </Routes>
               <Footer />
               <Toaster
