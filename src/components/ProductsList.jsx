@@ -3,17 +3,7 @@ import useProducts from '../hooks/useProducts';
 import useCategories from '../hooks/useCategories';
 
 export default function ProductsList() {
-  const {
-    products,
-    loading,
-    error,
-    pagination,
-    fetchProducts,
-    createProduct,
-    updateProduct,
-    deleteProduct
-  } = useProducts();
-
+  const { products, loading, error, createProduct, updateProduct, deleteProduct } = useProducts();
   const { categories } = useCategories();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,9 +13,7 @@ export default function ProductsList() {
     description: '',
     price: '',
     stock: '',
-    categoryId: '',
-    brand: '',
-    imageUrl: ''
+    categoryId: ''
   });
 
   const resetForm = () => {
@@ -34,9 +22,7 @@ export default function ProductsList() {
       description: '',
       price: '',
       stock: '',
-      categoryId: '',
-      brand: '',
-      imageUrl: ''
+      categoryId: ''
     });
     setEditingProduct(null);
   };
@@ -48,9 +34,7 @@ export default function ProductsList() {
       description: product.description || '',
       price: product.price?.toString() || '',
       stock: product.stock?.toString() || '',
-      categoryId: product.categoryId || '',
-      brand: product.brand || '',
-      imageUrl: product.imageUrl || ''
+      categoryId: product.categoryId || ''
     });
     setIsModalOpen(true);
   };
@@ -63,8 +47,7 @@ export default function ProductsList() {
         description: formData.description,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        categoryId: formData.categoryId,
-        imageUrl: formData.imageUrl
+        categoryId: formData.categoryId
       };
 
       if (editingProduct) {
@@ -75,7 +58,6 @@ export default function ProductsList() {
 
       setIsModalOpen(false);
       resetForm();
-      fetchProducts();
     } catch (error) {
       console.error('Error:', error);
     }
@@ -85,7 +67,6 @@ export default function ProductsList() {
     if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
       try {
         await deleteProduct(productId);
-        fetchProducts();
       } catch (error) {
         console.error('Error:', error);
       }
