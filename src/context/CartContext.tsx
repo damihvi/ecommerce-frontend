@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { API_CONFIG } from '../routes';
 import toast from 'react-hot-toast';
 
@@ -44,6 +45,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const { user, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
 
   // Load cart from localStorage
   const loadCartFromStorage = useCallback(() => {
@@ -161,6 +163,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return newItems;
       });
 
+      // Invalidar query de productos para actualizar el stock en la UI
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
       toast.success(`${product.name} agregado al carrito`);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -220,6 +225,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           });
 
           saveCartToStorage(newItems);
+          
+          // Invalidar query de productos para actualizar el stock en la UI
+          queryClient.invalidateQueries({ queryKey: ['products'] });
+          
           toast.success('Carrito actualizado');
           return newItems;
         });
@@ -261,6 +270,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return newItems;
       });
 
+      // Invalidar query de productos para actualizar el stock en la UI
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
       toast.success('Producto eliminado del carrito');
     } catch (error) {
       console.error('Error removing from cart:', error);
@@ -270,6 +282,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         saveCartToStorage(newItems);
         return newItems;
       });
+      
+      // Invalidar query de productos para actualizar el stock en la UI
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      
       toast.success('Producto eliminado del carrito');
     } finally {
       setLoading(false);
