@@ -13,7 +13,8 @@ export default function ProductsList() {
     description: '',
     price: '',
     stock: '',
-    categoryId: ''
+    categoryId: '',
+    brand: ''
   });
 
   const resetForm = () => {
@@ -22,7 +23,8 @@ export default function ProductsList() {
       description: '',
       price: '',
       stock: '',
-      categoryId: ''
+      categoryId: '',
+      brand: ''
     });
     setEditingProduct(null);
   };
@@ -34,7 +36,8 @@ export default function ProductsList() {
       description: product.description || '',
       price: product.price?.toString() || '',
       stock: product.stock?.toString() || '',
-      categoryId: product.categoryId || ''
+      categoryId: product.categoryId || '',
+      brand: product.brand || ''
     });
     setIsModalOpen(true);
   };
@@ -47,7 +50,8 @@ export default function ProductsList() {
         description: formData.description,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        categoryId: formData.categoryId
+        categoryId: formData.categoryId,
+        brand: formData.brand
       };
 
       if (editingProduct) {
@@ -181,7 +185,7 @@ export default function ProductsList() {
       {/* Modal de crear/editar producto */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border max-w-2xl w-full mx-4 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border max-w-2xl w-full shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingProduct ? 'Editar Producto' : 'Agregar Producto'}

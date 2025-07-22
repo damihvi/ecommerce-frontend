@@ -5,6 +5,8 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  stock?: number;
+  brand?: string;
   imageUrl: string;
   categoryId: number;
   category?: {
