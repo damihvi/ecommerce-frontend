@@ -64,7 +64,7 @@ const Navigation: React.FC = () => {
             <NavLink to="/">Inicio</NavLink>
             <NavLink to="/products">Productos</NavLink>
             <NavLink to="/services">Servicios</NavLink>
-            <NavLink to="/about">Nosotros</NavLink>
+            <NavLink to="/about">yo</NavLink>
             <NavLink to="/contact">Contacto</NavLink>
             
             {isAuthenticated && (

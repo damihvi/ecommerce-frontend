@@ -76,7 +76,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/about" className="text-gray-400 hover:text-orange-400 transition-colors">
-                  Nosotros
+                  Yo
                 </Link>
               </li>
             </ul>
@@ -84,7 +84,7 @@ const Footer: React.FC = () => {
 
           {/* Redes Sociales */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Síguenos</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">Sígueme</h3>
             <div className="space-y-3">
               <a 
                 href="https://www.facebook.com/share/1C5mXYrvq1/?mibextid=wwXIfr" 
@@ -128,7 +128,7 @@ const Footer: React.FC = () => {
         <div className="border-t border-gray-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2025 ECommerce Damian Herrera/ damihvi.
+              © 2025 ECommerce Damian Herrera/damihvi.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-orange-400 text-sm transition-colors">
