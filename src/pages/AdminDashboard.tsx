@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import UsersList from '../components/UsersList';
 import ProductsList from '../components/ProductsList';
 import CategoriesList from '../components/CategoriesList';
-import PasswordReset from '../components/PasswordReset';
 
 interface Category {
   id: string;
@@ -15,7 +14,7 @@ interface Category {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users' | 'password-reset'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users'>('products');
 
   // Redirigir si no está autenticado
   React.useEffect(() => {
@@ -86,16 +85,6 @@ const AdminDashboard: React.FC = () => {
             >
               Usuarios
             </button>
-            <button
-              onClick={() => setActiveTab('password-reset')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'password-reset'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Reset Password
-            </button>
           </div>
         </div>
       </div>
@@ -123,14 +112,6 @@ const AdminDashboard: React.FC = () => {
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900">Usuarios almacenados</h2>
             <UsersList />
-          </div>
-        )}
-
-        {/* Password Reset Tab */}
-        {activeTab === 'password-reset' && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Reset Password</h2>
-            <PasswordReset />
           </div>
         )}
       </div>

@@ -12,6 +12,7 @@ interface LoginFormData {
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
   const {
@@ -20,11 +21,19 @@ const Login: React.FC = () => {
     formState: { errors },
   } = useForm<LoginFormData>();
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: LoginFormData, event?: React.BaseSyntheticEvent) => {
+    if (event) {
+      event.preventDefault();
+    }
+    
     setIsLoading(true);
+    setError(''); // Clear previous errors
+    console.log('Starting login process...'); // Debug log
+    
     try {
       console.log('Login attempt with:', data); // Debug log
       await login(data);
+      console.log('Login successful!'); // Debug log
       toast.success('Login successful!');
       
       // Esperar un poco para que el estado se actualice
@@ -34,6 +43,11 @@ const Login: React.FC = () => {
       
     } catch (error: any) {
       console.error('Login error:', error);
+      console.log('Error details:', {
+        message: error.message,
+        response: error.response,
+        status: error.response?.status
+      }); // Debug log
       
       // Better error message handling
       let errorMessage = 'Error de login';
@@ -46,8 +60,12 @@ const Login: React.FC = () => {
         errorMessage = 'El servidor está iniciando. Esto puede tomar unos minutos en el primer acceso. Por favor, intenta nuevamente.';
       }
       
+      console.log('Setting error state:', errorMessage); // Debug log
+      setError(errorMessage);
+      // También usar toast pero no como única fuente de error
       toast.error(errorMessage);
     } finally {
+      console.log('Setting loading to false'); // Debug log
       setIsLoading(false);
     }
   };
@@ -69,7 +87,11 @@ const Login: React.FC = () => {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form 
+          className="mt-8 space-y-6" 
+          onSubmit={handleSubmit(onSubmit)}
+          onReset={(e) => e.preventDefault()}
+        >
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">

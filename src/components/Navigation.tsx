@@ -92,7 +92,9 @@ const Navigation: React.FC = () => {
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-orange-500 rounded-full"></div>
                   )}
                 </Link>
-                <NavLink to="/admin">Admin</NavLink>
+                {user?.role === 'admin' && (
+                  <NavLink to="/admin">Admin</NavLink>
+                )}
               </>
             )}
           </div>
@@ -315,9 +317,11 @@ const Navigation: React.FC = () => {
                   <Link to="/cart" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/cart') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
                     Carrito {totalItems > 0 && `(${totalItems})`}
                   </Link>
-                  <Link to="/admin" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/admin') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
-                    Admin
-                  </Link>
+                  {user?.role === 'admin' && (
+                    <Link to="/admin" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/admin') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
+                      Admin
+                    </Link>
+                  )}
                   <Link to="/profile" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/profile') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
                     Perfil
                   </Link>

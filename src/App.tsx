@@ -19,6 +19,7 @@ import Services from './pages/Services';
 import Blog from './pages/Blog';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 import { apiClient } from './services/api';
 
 // Create a query client
@@ -59,8 +60,16 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/admin/products" element={<AdminDashboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/products" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
               </Routes>
               <Footer />
               <Toaster
