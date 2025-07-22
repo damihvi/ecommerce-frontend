@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { API_CONFIG } from '../routes';
 import toast from 'react-hot-toast';
 
 // Types
@@ -88,7 +89,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, [isAuthenticated, user, loadCartFromStorage]);
 
-  const addToCart = useCallback((product: Product, quantity: number = 1) => {
+  const addToCart = useCallback(async (product: Product, quantity: number = 1) => {
     if (!user) {
       toast.error('Por favor inicia sesión para agregar productos al carrito');
       return;
@@ -104,81 +105,176 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       return;
     }
 
-    setItems(currentItems => {
-      const existingItem = currentItems.find(item => item.product.id === product.id);
-      let newItems: CartItem[];
+    setLoading(true);
 
-      if (existingItem) {
-        // Update existing item
-        const newQuantity = existingItem.quantity + quantity;
-        if (newQuantity > product.stock) {
-          toast.error('No hay suficiente stock disponible');
-          return currentItems;
-        }
+    try {
+      // Decrementar stock en el backend
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products/${product.id}/stock`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ quantity: -quantity }) // Cantidad negativa para decrementar
+      });
 
-        newItems = currentItems.map(item =>
-          item.product.id === product.id
-            ? {
-                ...item,
-                quantity: newQuantity,
-                subtotal: newQuantity * product.price
-              }
-            : item
-        );
-      } else {
-        // Add new item
-        const cartItem: CartItem = {
-          id: `${product.id}_${Date.now()}`,
-          product,
-          quantity,
-          price: product.price,
-          subtotal: quantity * product.price
-        };
-        newItems = [...currentItems, cartItem];
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Error al actualizar stock');
+        return;
       }
 
-      saveCartToStorage(newItems);
-      toast.success('Producto agregado al carrito');
-      return newItems;
-    });
+      const { data: updatedProduct } = await response.json();
+
+      setItems(currentItems => {
+        const existingItem = currentItems.find(item => item.product.id === product.id);
+        let newItems: CartItem[];
+
+        if (existingItem) {
+          // Update existing item
+          const newQuantity = existingItem.quantity + quantity;
+
+          newItems = currentItems.map(item =>
+            item.product.id === product.id
+              ? {
+                  ...item,
+                  quantity: newQuantity,
+                  subtotal: newQuantity * product.price,
+                  product: { ...item.product, stock: updatedProduct.stock } // Actualizar stock local
+                }
+              : item
+          );
+        } else {
+          // Add new item
+          const cartItem: CartItem = {
+            id: `${product.id}_${Date.now()}`,
+            product: { ...product, stock: updatedProduct.stock }, // Usar stock actualizado
+            quantity,
+            price: product.price,
+            subtotal: quantity * product.price
+          };
+          newItems = [...currentItems, cartItem];
+        }
+
+        saveCartToStorage(newItems);
+        return newItems;
+      });
+
+      toast.success(`${product.name} agregado al carrito`);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Error al agregar producto al carrito');
+    } finally {
+      setLoading(false);
+    }
   }, [user, saveCartToStorage]);
 
-  const updateQuantity = useCallback((cartItemId: string, quantity: number) => {
+  const updateQuantity = useCallback(async (cartItemId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(cartItemId);
       return;
     }
 
-    setItems(currentItems => {
-      const newItems = currentItems.map(item => {
-        if (item.id === cartItemId) {
-          if (quantity > item.product.stock) {
-            toast.error('No hay suficiente stock disponible');
-            return item;
-          }
-          return {
-            ...item,
-            quantity,
-            subtotal: quantity * item.price
-          };
-        }
-        return item;
+    const currentItem = items.find(item => item.id === cartItemId);
+    if (!currentItem) return;
+
+    const quantityDifference = quantity - currentItem.quantity;
+    
+    // Verificar que hay suficiente stock para el incremento
+    if (quantityDifference > 0 && quantity > currentItem.product.stock) {
+      toast.error('No hay suficiente stock disponible');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Actualizar stock en el backend
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products/${currentItem.product.id}/stock`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ quantity: -quantityDifference })
       });
 
-      saveCartToStorage(newItems);
-      toast.success('Carrito actualizado');
-      return newItems;
-    });
-  }, [saveCartToStorage]);
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        
+        setItems(currentItems => {
+          const newItems = currentItems.map(item => {
+            if (item.id === cartItemId) {
+              return {
+                ...item,
+                quantity,
+                subtotal: quantity * item.price,
+                product: {
+                  ...item.product,
+                  stock: updatedProduct.stock
+                }
+              };
+            }
+            return item;
+          });
 
-  const removeFromCart = useCallback((cartItemId: string) => {
-    setItems(currentItems => {
-      const newItems = currentItems.filter(item => item.id !== cartItemId);
-      saveCartToStorage(newItems);
+          saveCartToStorage(newItems);
+          toast.success('Carrito actualizado');
+          return newItems;
+        });
+      } else {
+        toast.error('Error al actualizar el stock');
+      }
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      toast.error('Error al actualizar el carrito');
+    }
+  }, [items, saveCartToStorage]);
+
+  const removeFromCart = useCallback(async (cartItemId: string) => {
+    const itemToRemove = items.find(item => item.id === cartItemId);
+    if (!itemToRemove) return;
+
+    setLoading(true);
+
+    try {
+      // Incrementar stock en el backend cuando se remueve del carrito
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/products/${itemToRemove.product.id}/stock`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ quantity: itemToRemove.quantity }) // Cantidad positiva para incrementar
+      });
+
+      if (!response.ok) {
+        console.error('Error restoring stock');
+        // Continuar con la eliminación del carrito aunque falle el stock
+      }
+
+      setItems(currentItems => {
+        const newItems = currentItems.filter(item => item.id !== cartItemId);
+        saveCartToStorage(newItems);
+        return newItems;
+      });
+
       toast.success('Producto eliminado del carrito');
-      return newItems;
-    });
-  }, [saveCartToStorage]);
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      // Continuar con la eliminación local
+      setItems(currentItems => {
+        const newItems = currentItems.filter(item => item.id !== cartItemId);
+        saveCartToStorage(newItems);
+        return newItems;
+      });
+      toast.success('Producto eliminado del carrito');
+    } finally {
+      setLoading(false);
+    }
+  }, [items, saveCartToStorage]);
 
   const clearCart = useCallback(() => {
     setItems([]);
