@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,9 +15,10 @@ export default function ProductsList() {
     category: ''
   });
 
-  // Cargar productos al montar el componente
+  // Cargar productos y categorías al montar el componente
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -44,6 +46,30 @@ export default function ProductsList() {
       setError('Error de conexión');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('https://damihvi.onrender.com/api/categories');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Categories response:', data); // Debug log
+        
+        // Validar que sea un array
+        if (Array.isArray(data)) {
+          setCategories(data);
+        } else if (data && Array.isArray(data.data)) {
+          setCategories(data.data);
+        } else {
+          console.error('Invalid categories format:', data);
+          setCategories([]);
+        }
+      } else {
+        console.error('Error al cargar categorías');
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
     }
   };
 
@@ -259,12 +285,19 @@ export default function ProductsList() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.category}
                     onChange={(e) => setFormData({...formData, category: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                    required
+                  >
+                    <option value="">Selecciona una categoría</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="flex justify-end space-x-2 pt-4">

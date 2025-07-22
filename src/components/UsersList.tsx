@@ -20,7 +20,20 @@ const UsersList: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://damihvi.onrender.com/api/users');
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch('https://damihvi.onrender.com/api/users', {
+        method: 'GET',
+        headers
+      });
+      
       if (response.ok) {
         const data = await response.json();
         console.log('Users response:', data); // Debug log
@@ -57,6 +70,15 @@ const UsersList: React.FC = () => {
     setError('');
 
     try {
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const url = editingUser 
         ? `https://damihvi.onrender.com/api/users/${editingUser.id}`
         : 'https://damihvi.onrender.com/api/users';
@@ -65,7 +87,7 @@ const UsersList: React.FC = () => {
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(formData),
       });
 
@@ -98,8 +120,16 @@ const UsersList: React.FC = () => {
     if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
 
     try {
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`https://damihvi.onrender.com/api/users/${id}`, {
         method: 'DELETE',
+        headers,
       });
 
       if (response.ok) {
