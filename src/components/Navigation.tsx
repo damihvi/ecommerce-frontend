@@ -65,7 +65,6 @@ const Navigation: React.FC = () => {
             <NavLink to="/products">Productos</NavLink>
             <NavLink to="/services">Servicios</NavLink>
             <NavLink to="/about">Nosotros</NavLink>
-            <NavLink to="/blog">Blog</NavLink>
             <NavLink to="/contact">Contacto</NavLink>
             
             {isAuthenticated && (
@@ -304,9 +303,6 @@ const Navigation: React.FC = () => {
               </Link>
               <Link to="/about" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/about') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
                 Nosotros
-              </Link>
-              <Link to="/blog" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/blog') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
-                Blog
               </Link>
               <Link to="/contact" className={`block px-3 py-2 rounded-xl text-lg font-medium ${isActive('/contact') ? 'text-primary-600 bg-primary-50' : 'text-dark-600'}`} onClick={() => setIsMenuOpen(false)}>
                 Contacto

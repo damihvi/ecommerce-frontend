@@ -368,11 +368,11 @@ const Services: React.FC = () => {
             </div>
             <div className="border-b border-gray-200 pb-4">
               <h3 className="font-semibold text-gray-900 mb-2">¿Se puede devolver un producto?</h3>
-              <p className="text-gray-600">Siento que fue tiempo perdido tener que modificar todo todo el front.</p>
+              <p className="text-gray-600">Si, se puede devolver siempre y cuando se tenga pruebas de que llegó mal.</p>
             </div>
             <div className="border-b border-gray-200 pb-4">
               <h3 className="font-semibold text-gray-900 mb-2">¿Qué métodos de pago se aceptan?</h3>
-              <p className="text-gray-600">Pude haber estudiado para ciberseguridad o disfrutar el poco tiempo libre que tengo.</p>
+              <p className="text-gray-600">Nose que mas poner</p>
             </div>
             <div className="border-b border-gray-200 pb-4">
               <h3 className="font-semibold text-gray-900 mb-2">¿Cómo puedo rastrear mi pedido?</h3>
