@@ -35,8 +35,7 @@
     "eject": "react-scripts eject",
     "configure:render": "node configure-env.js production",
     "configure:dev": "node configure-env.js development http://localhost:3001/api",
-    "configure:local": "node configure-env.js development http://localhost:3000/api",
-    "test:backend": "node test-backend.js"
+    "configure:local": "node configure-env.js development http://localhost:3000/api"
   },
   "eslintConfig": {
     "extends": [
