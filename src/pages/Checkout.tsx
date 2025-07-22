@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { API_CONFIG } from '../routes';
 import toast from 'react-hot-toast';
 
 interface CheckoutForm {
@@ -52,23 +53,50 @@ const Checkout: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // Simular procesamiento de orden
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Aquí iría la integración con el backend para crear la orden
+      // Crear la orden en el backend
+      const token = localStorage.getItem('token');
       const orderData = {
-        items: items,
+        userId: user?.id,
         total: totalPrice,
-        customerInfo: form,
-        status: 'pending'
+        status: 'pending',
+        items: items.map(item => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price: item.price,
+          subtotal: item.subtotal
+        })),
+        customerInfo: form
       };
 
-      console.log('Orden creada:', orderData);
-      
-      // Limpiar carrito y mostrar confirmación
-      clearCart();
-      toast.success('¡Orden procesada exitosamente!');
-      navigate('/order-confirmation');
+      console.log('Sending order data:', orderData);
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (response.ok) {
+        const createdOrder = await response.json();
+        console.log('Order created successfully:', createdOrder);
+        
+        // Limpiar carrito y mostrar confirmación
+        clearCart();
+        toast.success('¡Pedido procesado exitosamente!');
+        
+        // Guardar ID del pedido en localStorage para la página de confirmación
+        localStorage.setItem('lastOrderId', createdOrder.data?.id || createdOrder.id);
+        
+        navigate('/order-confirmation');
+      } else {
+        const errorData = await response.json();
+        console.error('Order creation failed:', errorData);
+        toast.error(errorData.message || 'Error al procesar el pedido');
+      }
       
     } catch (error) {
       console.error('Error procesando orden:', error);

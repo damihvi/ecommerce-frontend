@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getOrderDisplayNumber } from '../utils/orderUtils';
 
 const OrderConfirmation: React.FC = () => {
   const navigate = useNavigate();
+  const [orderId, setOrderId] = useState<string>('');
+
+  useEffect(() => {
+    // Obtener el ID del pedido del localStorage
+    const lastOrderId = localStorage.getItem('lastOrderId');
+    if (lastOrderId) {
+      setOrderId(lastOrderId);
+      // Limpiar el localStorage después de obtener el ID
+      localStorage.removeItem('lastOrderId');
+    }
+  }, []);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -39,7 +51,7 @@ const OrderConfirmation: React.FC = () => {
           <div className="space-y-2 text-left">
             <div className="flex justify-between">
               <span className="text-gray-600">Número de Orden:</span>
-              <span className="font-medium">#ORD-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+              <span className="font-medium">{getOrderDisplayNumber(orderId)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Fecha:</span>
