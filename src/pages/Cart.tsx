@@ -11,12 +11,12 @@ const Cart: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please login to view your cart</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Por favor inicia sesión para ver tu carrito</h2>
           <Link
             to="/login"
             className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
-            Login
+            Iniciar Sesión
           </Link>
         </div>
       </div>
@@ -35,17 +35,17 @@ const Cart: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Cart</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Tu Carrito</h1>
           
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">🛒</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-            <p className="text-gray-600 mb-6">Start shopping to add items to your cart</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Tu carrito está vacío</h3>
+            <p className="text-gray-600 mb-6">Comienza a comprar para agregar productos a tu carrito</p>
             <Link
               to="/products"
               className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
             >
-              Continue Shopping
+              Continuar Comprando
             </Link>
           </div>
         </div>
@@ -57,12 +57,12 @@ const Cart: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Your Cart</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Tu Carrito</h1>
           <button
             onClick={clearCart}
             className="text-red-600 hover:text-red-700 text-sm font-medium"
           >
-            Clear Cart
+            Vaciar Carrito
           </button>
         </div>
 
@@ -72,7 +72,7 @@ const Cart: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  Cart Items ({totalItems})
+                  Productos en el Carrito ({totalItems})
                 </h2>
               </div>
               
@@ -89,7 +89,7 @@ const Cart: React.FC = () => {
                             className="w-full h-full object-cover rounded-md"
                           />
                         ) : (
-                          <div className="text-gray-400 text-xs">No image</div>
+                          <div className="text-gray-400 text-xs">Sin imagen</div>
                         )}
                       </div>
 
@@ -99,7 +99,7 @@ const Cart: React.FC = () => {
                           {item.product.name}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          ${item.price.toFixed(2)} each
+                          ${item.price.toFixed(2)} cada uno
                         </p>
                       </div>
 
@@ -133,7 +133,7 @@ const Cart: React.FC = () => {
                         onClick={() => removeFromCart(item.id)}
                         className="text-red-600 hover:text-red-700 text-sm font-medium"
                       >
-                        Remove
+                        Eliminar
                       </button>
                     </div>
                   </div>
@@ -146,22 +146,22 @@ const Cart: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Order Summary
+                Resumen del Pedido
               </h2>
               
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span>Subtotal ({totalItems} items)</span>
+                  <span>Subtotal ({totalItems} productos)</span>
                   <span>${totalPrice.toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between text-sm">
-                  <span>Shipping</span>
-                  <span>Free</span>
+                  <span>Envío</span>
+                  <span>Gratis</span>
                 </div>
                 
                 <div className="flex justify-between text-sm">
-                  <span>Tax</span>
+                  <span>Impuestos</span>
                   <span>${(totalPrice * 0.15).toFixed(2)}</span>
                 </div>
                 
@@ -185,7 +185,7 @@ const Cart: React.FC = () => {
                   to="/products"
                   className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors text-center block"
                 >
-                  Continue Shopping
+                  Continuar Comprando
                 </Link>
               </div>
             </div>
