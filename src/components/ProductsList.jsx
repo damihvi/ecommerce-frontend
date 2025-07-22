@@ -77,6 +77,8 @@ export default function ProductsList() {
     e.preventDefault();
     setLoading(true);
     
+    console.log('Submitting product with data:', formData); // Debug log
+
     try {
       const url = editingProduct 
         ? `https://damihvi.onrender.com/api/products/${editingProduct.id}`
@@ -84,17 +86,24 @@ export default function ProductsList() {
       
       const method = editingProduct ? 'PUT' : 'POST';
       
+      const requestData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock)
+      };
+      
+      console.log('Request data being sent:', requestData); // Debug log
+      
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price),
-          stock: parseInt(formData.stock)
-        }),
+        body: JSON.stringify(requestData),
       });
+
+      const responseData = await response.json();
+      console.log('Server response:', responseData); // Debug log
 
       if (response.ok) {
         await fetchProducts();
@@ -104,6 +113,7 @@ export default function ProductsList() {
         setError('Error al guardar producto');
       }
     } catch (err) {
+      console.error('Error submitting product:', err); // Debug log
       setError('Error de conexión');
     } finally {
       setLoading(false);
