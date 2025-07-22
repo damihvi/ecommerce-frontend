@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCategories } from '../hooks/useCategories';
+import useCategories from '../hooks/useCategories';
 
 const AdminDashboardTest: React.FC = () => {
   console.log('AdminDashboard: Starting component render');

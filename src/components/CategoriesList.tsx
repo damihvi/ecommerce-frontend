@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useCategories } from '../hooks/useCategories';
+import useCategories from '../hooks/useCategories';
 import { useAuth } from '../context/AuthContext';
 
 interface Category {
