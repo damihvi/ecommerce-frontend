@@ -16,7 +16,7 @@ interface Product {
   isActive: boolean;
 }
 
-const useProducts = () => {
+function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -128,6 +128,6 @@ const useProducts = () => {
     deleteProduct,
     toggleProductActive
   };
-};
+}
 
 export default useProducts;
