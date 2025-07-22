@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { productsAPI, categoriesAPI } from '../services/api';
+import { productsAPI, categoriesAPI, searchAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 
 // Helper function to get the correct image URL
@@ -46,23 +46,31 @@ const Products: React.FC = () => {
   const { data: products, isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ['products', selectedCategory, searchTerm],
     queryFn: async () => {
-      const params: any = { isActive: true }; // Only fetch active products for public view
-      if (selectedCategory) params.categoryId = selectedCategory;
-      if (searchTerm) params.search = searchTerm;
+      let response;
       
-      const response = await productsAPI.getAll(params);
+      // If there's a search term, use the search API to trigger analytics
+      if (searchTerm && searchTerm.trim()) {
+        console.log('🔍 Using search API for query:', searchTerm);
+        response = await searchAPI.products(searchTerm.trim(), selectedCategory?.toString());
+      } else {
+        // For non-search requests, use regular products API
+        const params: any = { isActive: true };
+        if (selectedCategory) params.categoryId = selectedCategory;
+        response = await productsAPI.getAll(params);
+      }
       
-      // The API returns { success, message, data } structure
+      // The API returns { success, message, data } structure or direct array for search
       const products = response.data.data || response.data;
       
       // Filter active products and convert price from string to number
-      const processedData = products
+      const processedData = (Array.isArray(products) ? products : [])
         .filter((product: any) => product.isActive) // Client-side filter for active products
         .map((product: any) => ({
           ...product,
           price: parseFloat(product.price)
         }));
       
+      console.log(`📊 Processed ${processedData.length} products for display`);
       return processedData;
     },
     retry: 1,
