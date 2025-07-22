@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
-  const { loading } = useAuth();
+  const { loading, isAuthenticated } = useAuth();
 
   // Show loading state
   if (loading) {
@@ -220,12 +220,14 @@ const Home: React.FC = () => {
             Extraño mi tiempo libre
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/register"
-              className="bg-white text-primary-600 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors shadow-lg text-lg"
-            >
-              Crear Cuenta
-            </Link>
+            {!isAuthenticated && (
+              <Link
+                to="/register"
+                className="bg-white text-primary-600 px-8 py-4 rounded-2xl font-semibold hover:bg-gray-100 transition-colors shadow-lg text-lg"
+              >
+                Crear Cuenta
+              </Link>
+            )}
             <Link
               to="/products"
               className="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white/20 transition-colors border border-white/20 text-lg"
