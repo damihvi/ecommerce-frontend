@@ -6,7 +6,6 @@ import ProductsList from '../components/ProductsList';
 import CategoriesList from '../components/CategoriesList';
 import useProducts from '../hooks/useProducts';
 import useCategories from '../hooks/useCategories';
-import useUsers from '../hooks/useUsers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsAPI, categoriesAPI } from '../services/api';
 import toast from 'react-hot-toast';
@@ -59,7 +58,7 @@ interface UserFormData {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users' | 'stats'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'users'>('products');
   
   // Estados para modales
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -88,7 +87,6 @@ const AdminDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const { products, loading: productsLoading } = useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
-  const { users, isLoading: usersLoading } = useUsers();
   
   // Mutations
   const createCategoryMutation = useMutation({
@@ -204,16 +202,6 @@ const AdminDashboard: React.FC = () => {
             >
               Usuarios
             </button>
-            <button
-              onClick={() => setActiveTab('stats')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'stats'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Estadísticas
-            </button>
           </div>
         </div>
       </div>
@@ -241,94 +229,6 @@ const AdminDashboard: React.FC = () => {
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900">Usuarios almacenados</h2>
             <UsersList />
-          </div>
-        )}
-
-        {/* Stats Tab */}
-        {activeTab === 'stats' && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Estadísticas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Productos
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {productsLoading ? '...' : (products?.length || 0)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Categorías
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {categoriesLoading ? '...' : (categories?.length || 0)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Usuarios Normales
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {usersLoading ? '...' : (users?.filter(user => user.role === 'customer').length || 0)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z" />
-                    </svg>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Stock Total
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {productsLoading ? '...' : (products && products.length > 0 ? products.reduce((total: number, product: any) => total + product.stock, 0) : 0)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>
