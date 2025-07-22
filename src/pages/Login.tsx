@@ -75,7 +75,7 @@ const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            ingresa a tu cuenta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
@@ -83,7 +83,7 @@ const Login: React.FC = () => {
               to="/register"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              create a new account
+              crea una nueva cuenta
             </Link>
           </p>
         </div>
@@ -95,7 +95,7 @@ const Login: React.FC = () => {
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
-                Email address
+                Correo
               </label>
               <input
                 {...register('email', {
@@ -116,7 +116,7 @@ const Login: React.FC = () => {
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <input
