@@ -91,7 +91,9 @@ export default function ProductsList() {
       description: product.description || '',
       price: product.price?.toString() || '',
       stock: product.stock?.toString() || '',
-      category: product.category || ''
+      category: typeof product.category === 'object' && product.category?.name 
+        ? product.category.name 
+        : product.category || ''
     });
     setIsModalOpen(true);
   };
@@ -175,7 +177,11 @@ export default function ProductsList() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.price}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.category}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {typeof product.category === 'object' && product.category?.name 
+                      ? product.category.name 
+                      : product.category || 'Sin categoría'}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button 
                       onClick={() => handleEdit(product)}
