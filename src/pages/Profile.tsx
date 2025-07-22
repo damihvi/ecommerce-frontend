@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
-import { authAPI } from '../services/api';
+import { authAPI, ordersAPI } from '../services/api';
+import { formatOrderId } from '../utils/orderUtils';
 import toast from 'react-hot-toast';
 
 interface UserFormData {
@@ -16,6 +18,26 @@ interface PasswordFormData {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+interface OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+  product: {
+    id: string;
+    name: string;
+    imageUrl?: string;
+  };
+}
+
+interface Order {
+  id: string;
+  total: number;
+  status: string;
+  createdAt: string;
+  items: OrderItem[];
 }
 
 const Profile: React.FC = () => {
@@ -34,6 +56,22 @@ const Profile: React.FC = () => {
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
+  });
+
+  // Fetch user orders
+  const { 
+    data: userOrders, 
+    isLoading: ordersLoading, 
+    error: ordersError 
+  } = useQuery<Order[]>({
+    queryKey: ['userOrders', user?.id],
+    queryFn: async () => {
+      if (!user?.id) throw new Error('User ID not available');
+      const response = await ordersAPI.getByUser(user.id);
+      return response.data;
+    },
+    enabled: !!user?.id && isAuthenticated,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Cargar datos del usuario cuando el componente se monta
@@ -164,6 +202,43 @@ const Profile: React.FC = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const formatOrderDate = (dateString: string) => {
+    if (!dateString) return 'Fecha no disponible';
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'Completado';
+      case 'cancelled':
+        return 'Cancelado';
+      case 'pending':
+        return 'Pendiente';
+      default:
+        return status;
+    }
   };
 
   return (
