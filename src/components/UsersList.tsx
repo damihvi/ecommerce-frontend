@@ -288,20 +288,20 @@ const UsersList: React.FC = () => {
                       onClick={() => toggleUserStatus(user.id, user.isActive)}
                       className={`mr-2 p-2 rounded-full transition-colors ${
                         user.isActive 
-                          ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200' 
+                          ? 'bg-red-100 text-red-600 hover:bg-red-200' 
                           : 'bg-green-100 text-green-600 hover:bg-green-200'
                       }`}
                       title={user.isActive ? 'Desactivar usuario' : 'Activar usuario'}
                     >
                       {user.isActive ? (
-                        // Icono de "user-slash" para desactivar usuario
+                        // Icono simple de "X" para desactivar
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L12 12m7-9l-4.242 4.242" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636L5.636 18.364m0-12.728L18.364 18.364" />
                         </svg>
                       ) : (
-                        // Icono de "user-check" para activar usuario  
+                        // Icono simple de "check" para activar
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
                     </button>
