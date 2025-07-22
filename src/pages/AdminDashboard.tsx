@@ -30,29 +30,9 @@ interface Category {
   description?: string;
 }
 
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 interface CategoryFormData {
   name: string;
   description: string;
-}
-
-interface UserFormData {
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  role: string;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -62,25 +42,14 @@ const AdminDashboard: React.FC = () => {
   
   // Estados para modales
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   
   // Estados para edición
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
   
   // Estados para formularios
   const [categoryFormData, setCategoryFormData] = useState<CategoryFormData>({
     name: '',
     description: '',
-  });
-  
-  const [userFormData, setUserFormData] = useState<UserFormData>({
-    username: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-    password: '',
-    role: 'customer',
   });
   
   // Query hooks
@@ -296,125 +265,6 @@ const AdminDashboard: React.FC = () => {
         </div>
       )} 
 
-      {/* User Modal */}
-      {/* {isUserModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsUserModalOpen(false)}></div>
-            
-            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-              <div className="sm:flex sm:items-start">
-                <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
-                  </h3>
-                  
-                  <form onSubmit={handleUserSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Nombre de Usuario *
-                      </label>
-                      <input
-                        type="text"
-                        value={userFormData.username}
-                        onChange={(e) => setUserFormData(prev => ({ ...prev, username: e.target.value }))}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Email *
-                      </label>
-                      <input
-                        type="email"
-                        value={userFormData.email}
-                        onChange={(e) => setUserFormData(prev => ({ ...prev, email: e.target.value }))}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Nombre *
-                        </label>
-                        <input
-                          type="text"
-                          value={userFormData.firstName}
-                          onChange={(e) => setUserFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                          required
-                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Apellido *
-                        </label>
-                        <input
-                          type="text"
-                          value={userFormData.lastName}
-                          onChange={(e) => setUserFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                          required
-                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Contraseña {editingUser ? '(dejar en blanco para no cambiar)' : '*'}
-                      </label>
-                      <input
-                        type="password"
-                        value={userFormData.password}
-                        onChange={(e) => setUserFormData(prev => ({ ...prev, password: e.target.value }))}
-                        required={!editingUser}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Rol *
-                      </label>
-                      <select
-                        value={userFormData.role}
-                        onChange={(e) => setUserFormData(prev => ({ ...prev, role: e.target.value }))}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      >
-                        <option value="customer">Customer</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 mt-6">
-                      <button
-                        type="button"
-                        onClick={() => setIsUserModalOpen(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={createUserMutation.isPending || updateUserMutation.isPending}
-                        className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
-                      >
-                        {editingUser ? 'Actualizar' : 'Crear'}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
