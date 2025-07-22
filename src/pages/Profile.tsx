@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { authAPI, ordersAPI } from '../services/api';
 import { formatOrderId } from '../utils/orderUtils';
+import { Order } from '../types/order';
 import toast from 'react-hot-toast';
 
 interface UserFormData {
@@ -18,26 +19,6 @@ interface PasswordFormData {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
-}
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  price: number;
-  subtotal: number;
-  product: {
-    id: string;
-    name: string;
-    imageUrl?: string;
-  };
-}
-
-interface Order {
-  id: string;
-  total: number;
-  status: string;
-  createdAt: string;
-  items: OrderItem[];
 }
 
 const Profile: React.FC = () => {
@@ -450,6 +431,80 @@ const Profile: React.FC = () => {
                       </button>
                     </div>
                   </div>
+                </div>
+
+                {/* Historial de pedidos */}
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6">Mis Pedidos</h3>
+                  
+                  {ordersLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <span className="ml-2 text-gray-600">Cargando pedidos...</span>
+                    </div>
+                  ) : ordersError ? (
+                    <div className="text-center py-8">
+                      <p className="text-red-600 mb-2">Error al cargar los pedidos</p>
+                      <p className="text-sm text-gray-500">Por favor, intenta recargar la página</p>
+                    </div>
+                  ) : !userOrders || userOrders.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 text-6xl mb-4">🛒</div>
+                      <h4 className="text-lg font-medium text-gray-900 mb-2">No has realizado pedidos aún</h4>
+                      <p className="text-gray-500">Cuando realices tu primer pedido, aparecerá aquí</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {userOrders.map((order) => (
+                        <div key={order.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-medium text-gray-900">
+                                Pedido #{formatOrderId(order.id)}
+                              </h4>
+                              <p className="text-sm text-gray-500">{formatOrderDate(order.createdAt)}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className={`inline-block px-3 py-1 text-xs rounded-full font-medium ${getStatusColor(order.status)}`}>
+                                {getStatusText(order.status)}
+                              </span>
+                              <p className="text-lg font-bold text-gray-900 mt-1">
+                                ${parseFloat(order.total.toString()).toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="border-t pt-3">
+                            <h5 className="text-sm font-medium text-gray-700 mb-2">
+                              Productos ({order.items.length})
+                            </h5>
+                            <div className="space-y-2">
+                              {order.items.map((item, index) => (
+                                <div key={item.id || index} className="flex justify-between items-center text-sm">
+                                  <div className="flex items-center">
+                                    {item.product?.imageUrl && (
+                                      <img 
+                                        src={item.product.imageUrl} 
+                                        alt={item.product.name}
+                                        className="w-8 h-8 object-cover rounded mr-3"
+                                      />
+                                    )}
+                                    <span className="text-gray-900">
+                                      {item.product?.name || 'Producto no disponible'}
+                                    </span>
+                                    <span className="text-gray-500 ml-2">x{item.quantity}</span>
+                                  </div>
+                                  <span className="text-gray-700 font-medium">
+                                    ${parseFloat(item.subtotal.toString()).toFixed(2)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             ) : (

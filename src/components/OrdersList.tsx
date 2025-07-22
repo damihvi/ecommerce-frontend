@@ -2,29 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { API_CONFIG } from '../routes';
 import { getOrderDisplayNumber } from '../utils/orderUtils';
+import { Order as BaseOrder, OrderItem as BaseOrderItem } from '../types/order';
 import toast from 'react-hot-toast';
 
-interface OrderItem {
-  id: string;
-  productName: string;
-  quantity: number;
-  price: number;
-  subtotal: number;
-}
-
-interface Order {
-  id: string;
-  total: number;
-  status: string;
-  createdAt: string;
-  userId: string;
+// Extend the base Order interface to include user information for admin view
+interface Order extends BaseOrder {
   user?: {
     id: string;
     email: string;
     firstName?: string;
     lastName?: string;
   };
-  items: OrderItem[];
+}
+
+// Extend the base OrderItem to handle cases where product might not be populated
+interface OrderItem extends Omit<BaseOrderItem, 'product'> {
+  productName?: string; // For backward compatibility
+  product?: {
+    id: string;
+    name: string;
+    imageUrl?: string;
+  };
 }
 
 const OrdersList: React.FC = () => {
@@ -295,7 +293,7 @@ const OrdersList: React.FC = () => {
                       {selectedOrder.items.map((item, index) => (
                         <div key={index} className="flex justify-between items-center border-b pb-2">
                           <div>
-                            <p className="text-sm font-medium">{item.productName || 'Producto'}</p>
+                            <p className="text-sm font-medium">{item.product?.name || (item as any).productName || 'Producto'}</p>
                             <p className="text-xs text-gray-500">Cantidad: {item.quantity}</p>
                           </div>
                           <p className="text-sm font-medium">${Number(item.subtotal || item.price * item.quantity).toFixed(2)}</p>
