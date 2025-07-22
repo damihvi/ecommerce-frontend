@@ -45,7 +45,7 @@ apiClient.interceptors.response.use(
 // API endpoints
 export const authAPI = {
   login: (credentials: { email: string; password: string }) =>
-    apiClient.post('/auth/login', credentials),
+    apiClient.post('/auth/login', { identifier: credentials.email, password: credentials.password }),
   register: (userData: { username: string; email: string; password: string }) =>
     apiClient.post('/auth/register', userData),
   getProfile: () => apiClient.get('/auth/profile'),
