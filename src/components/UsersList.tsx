@@ -1,31 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 interface User {
   id: string;
   email: string;
-  name: string;
-  role: string;
+  role: 'user' | 'admin';
   isActive: boolean;
-  createdAt: string;
 }
 
 const UsersList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: 'user',
-    isActive: true
-  });
-
-  // Cargar usuarios al montar el componente
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({ email: '', role: 'user' as 'user' | 'admin', isActive: true });
+  const { user: currentUser } = useAuth();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -33,40 +23,57 @@ const UsersList: React.FC = () => {
       const response = await fetch('https://damihvi.onrender.com/api/users');
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);
+        console.log('Users response:', data); // Debug log
+        
+        // Validar que sea un array
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else if (data && Array.isArray(data.data)) {
+          setUsers(data.data);
+        } else {
+          console.error('Invalid users format:', data);
+          setUsers([]);
+        }
       } else {
-        setError('Error al cargar usuarios');
+        throw new Error('Error al cargar usuarios');
       }
     } catch (err) {
+      console.error('Error fetching users:', err);
       setError('Error de conexión');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (currentUser?.role === 'admin') {
+      fetchUsers();
+    }
+  }, [currentUser]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+    setError('');
+
     try {
       const url = editingUser 
         ? `https://damihvi.onrender.com/api/users/${editingUser.id}`
         : 'https://damihvi.onrender.com/api/users';
       
       const method = editingUser ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        await fetchUsers();
-        setIsModalOpen(false);
-        resetForm();
+        fetchUsers();
+        setShowModal(false);
+        setEditingUser(null);
+        setFormData({ email: '', role: 'user', isActive: true });
       } else {
         setError('Error al guardar usuario');
       }
@@ -80,114 +87,104 @@ const UsersList: React.FC = () => {
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setFormData({
-      name: user.name || '',
-      email: user.email || '',
-      role: user.role || 'user',
-      isActive: user.isActive ?? true
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive
     });
-    setIsModalOpen(true);
+    setShowModal(true);
   };
 
-  const handleDelete = async (userId: string) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      try {
-        const response = await fetch(`https://damihvi.onrender.com/api/users/${userId}`, {
-          method: 'DELETE',
-        });
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
 
-        if (response.ok) {
-          await fetchUsers();
-        } else {
-          setError('Error al eliminar usuario');
-        }
-      } catch (err) {
-        setError('Error de conexión');
+    try {
+      const response = await fetch(`https://damihvi.onrender.com/api/users/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchUsers();
+      } else {
+        setError('Error al eliminar usuario');
       }
+    } catch (err) {
+      setError('Error de conexión');
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      email: '',
-      role: 'user',
-      isActive: true
-    });
+  const openCreateModal = () => {
     setEditingUser(null);
+    setFormData({ email: '', role: 'user', isActive: true });
+    setShowModal(true);
   };
 
-  const openAddModal = () => {
-    resetForm();
-    setIsModalOpen(true);
-  };
-
-  if (loading) {
-    return <div className="p-4">Cargando usuarios...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-red-600">Error: {error}</div>;
+  // Solo mostrar para administradores
+  if (currentUser?.role !== 'admin') {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <p className="text-red-600">No tienes permisos para ver esta página.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header con botón agregar */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Gestión de Usuarios</h2>
-        <button
-          onClick={openAddModal}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center space-x-2"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Agregar Usuario</span>
-        </button>
-      </div>
-
-      {/* Lista de usuarios */}
-      {!Array.isArray(users) || users.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-6">
-          <p>No hay usuarios registrados</p>
-          <p className="text-sm text-gray-500 mt-2">
-            Haz clic en "Agregar Usuario" para empezar
-          </p>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Gestión de Usuarios</h1>
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
         </div>
+      )}
+
+      <button
+        onClick={openCreateModal}
+        className="mb-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Crear Nuevo Usuario
+      </button>
+
+      {loading ? (
+        <div className="text-center">Cargando...</div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="overflow-x-auto shadow-lg rounded-lg">
+          <table className="min-w-full bg-white">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                <tr key={user.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
+                    }`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
                       {user.isActive ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button 
+                    <button
                       onClick={() => handleEdit(user)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-2"
+                      className="text-indigo-600 hover:text-indigo-900 mr-4"
                     >
                       Editar
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDelete(user.id)}
                       className="text-red-600 hover:text-red-900"
                     >
@@ -201,81 +198,71 @@ const UsersList: React.FC = () => {
         </div>
       )}
 
-      {/* Modal para agregar/editar usuario */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {editingUser ? 'Editar Usuario' : 'Agregar Usuario'}
-              </h3>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              {editingUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
+            </h3>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Rol
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value as 'user' | 'admin' })}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                >
+                  <option value="user">Usuario</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Rol</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="user">Usuario</option>
-                    <option value="admin">Administrador</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center">
+              <div className="mb-6">
+                <label className="flex items-center">
                   <input
                     type="checkbox"
-                    id="isActive"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="form-checkbox h-4 w-4 text-blue-600"
                   />
-                  <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                    Usuario activo
-                  </label>
-                </div>
+                  <span className="ml-2 text-gray-700">Usuario activo</span>
+                </label>
+              </div>
 
-                <div className="flex justify-end space-x-2 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {loading ? 'Guardando...' : (editingUser ? 'Actualizar' : 'Crear')}
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex items-center justify-between">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                  {loading ? 'Guardando...' : (editingUser ? 'Actualizar' : 'Crear')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

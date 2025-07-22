@@ -25,11 +25,22 @@ export default function ProductsList() {
       const response = await fetch('https://damihvi.onrender.com/api/products');
       if (response.ok) {
         const data = await response.json();
-        setProducts(data);
+        console.log('Products response:', data); // Debug log
+        
+        // Validar que sea un array
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else if (data && Array.isArray(data.data)) {
+          setProducts(data.data);
+        } else {
+          console.error('Invalid products format:', data);
+          setProducts([]);
+        }
       } else {
         setError('Error al cargar productos');
       }
     } catch (err) {
+      console.error('Error fetching products:', err);
       setError('Error de conexión');
     } finally {
       setLoading(false);
