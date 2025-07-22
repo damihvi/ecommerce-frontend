@@ -39,7 +39,6 @@ const Profile: React.FC = () => {
     confirmPassword: ''
   });
 
-  // Fetch user orders
   const { 
     data: userOrders, 
     isLoading: ordersLoading, 
@@ -52,28 +51,26 @@ const Profile: React.FC = () => {
       return response.data;
     },
     enabled: !!user?.id && isAuthenticated,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Cargar datos del usuario cuando el componente se monta
   useEffect(() => {
     if (user) {
-      console.log('Loading user data:', user); // Debug log
+      console.log('Loading user data:', user);
       setFormData({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         email: user.email || '',
-        phone: '', // Este campo no está en el User interface actual
+        phone: '',
         dateOfBirth: ''
       });
     }
   }, [user]);
 
-  console.log('Profile - Current user:', user); // Debug log
+  console.log('Profile - Current user:', user);
 
-  // Redireccionar si no está autenticado
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,16 +78,14 @@ const Profile: React.FC = () => {
     setLoading(true);
     
     try {
-      console.log('Updating profile with data:', formData); // Debug log
+      console.log('Updating profile with data:', formData);
       
-      // Llamada real a la API para actualizar el perfil
       const response = await authAPI.updateProfile(formData);
-      console.log('Profile update response:', response); // Debug log
+      console.log('Profile update response:', response);
       
       toast.success('Perfil actualizado correctamente');
       setIsEditing(false);
       
-      // Actualizar el localStorage con los nuevos datos si la API los devuelve
       if (response.data?.user) {
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }
@@ -224,7 +219,6 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
@@ -241,7 +235,6 @@ const Profile: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="text-center mb-6">
@@ -299,11 +292,9 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {!showPasswordForm ? (
               <>
-                {/* Información Personal */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold text-gray-900">Información Personal</h3>
@@ -413,7 +404,6 @@ const Profile: React.FC = () => {
                   )}
                 </div>
 
-                {/* Configuración de seguridad */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Configuración de Seguridad</h3>
                   <div className="space-y-4">
@@ -433,7 +423,6 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Historial de pedidos */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-6">Mis Pedidos</h3>
                   
@@ -508,7 +497,6 @@ const Profile: React.FC = () => {
                 </div>
               </>
             ) : (
-              /* Formulario de cambio de contraseña */
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xl font-bold text-gray-900">Cambiar Contraseña</h3>

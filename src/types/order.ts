@@ -1,5 +1,3 @@
-// Order-related type definitions for the frontend
-
 export interface OrderItem {
   id: string;
   quantity: number;

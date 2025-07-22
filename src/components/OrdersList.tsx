@@ -5,7 +5,6 @@ import { getOrderDisplayNumber } from '../utils/orderUtils';
 import { Order as BaseOrder, OrderItem as BaseOrderItem } from '../types/order';
 import toast from 'react-hot-toast';
 
-// Extend the base Order interface to include user information for admin view
 interface Order extends BaseOrder {
   user?: {
     id: string;
@@ -15,9 +14,8 @@ interface Order extends BaseOrder {
   };
 }
 
-// Extend the base OrderItem to handle cases where product might not be populated
 interface OrderItem extends Omit<BaseOrderItem, 'product'> {
-  productName?: string; // For backward compatibility
+  productName?: string;
   product?: {
     id: string;
     name: string;
@@ -74,7 +72,7 @@ const OrdersList: React.FC = () => {
 
       if (response.ok) {
         toast.success('Estado del pedido actualizado');
-        fetchOrders(); // Refresh the list
+        fetchOrders();
       } else {
         toast.error('Error al actualizar el estado');
       }
@@ -101,7 +99,7 @@ const OrdersList: React.FC = () => {
 
       if (response.ok) {
         toast.success('Pedido eliminado exitosamente');
-        fetchOrders(); // Refresh the list
+        fetchOrders();
       } else {
         toast.error('Error al eliminar el pedido');
       }
@@ -153,7 +151,6 @@ const OrdersList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Gestión de Pedidos</h2>
         <button
@@ -164,7 +161,6 @@ const OrdersList: React.FC = () => {
         </button>
       </div>
 
-      {/* Orders Table */}
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <div className="px-4 py-5 sm:p-6">
           {orders.length === 0 ? (
@@ -253,7 +249,6 @@ const OrdersList: React.FC = () => {
         </div>
       </div>
 
-      {/* Order Details Modal */}
       {showDetails && selectedOrder && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
