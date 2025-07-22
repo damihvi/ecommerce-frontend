@@ -6,6 +6,7 @@ import ProductsList from '../components/ProductsList';
 import CategoriesList from '../components/CategoriesList';
 import useProducts from '../hooks/useProducts';
 import useCategories from '../hooks/useCategories';
+import useUsers from '../hooks/useUsers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsAPI, categoriesAPI } from '../services/api';
 import toast from 'react-hot-toast';
@@ -87,6 +88,7 @@ const AdminDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const { products, loading: productsLoading } = useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
+  const { users, isLoading: usersLoading } = useUsers();
   
   // Mutations
   const createCategoryMutation = useMutation({
@@ -260,7 +262,7 @@ const AdminDashboard: React.FC = () => {
                         Total Productos
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {products?.length || 0}
+                        {productsLoading ? '...' : (products?.length || 0)}
                       </dd>
                     </dl>
                   </div>
@@ -280,7 +282,7 @@ const AdminDashboard: React.FC = () => {
                         Total Categorías
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {categories?.length || 0}
+                        {categoriesLoading ? '...' : (categories?.length || 0)}
                       </dd>
                     </dl>
                   </div>
@@ -291,16 +293,16 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
                     <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Valor Total Stock
+                        Usuarios Normales
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {products && products.length > 0 ? products.reduce((total: number, product: any) => total + (product.price * product.stock), 0).toLocaleString() : 0}
+                        {usersLoading ? '...' : (users?.filter(user => user.role === 'customer').length || 0)}
                       </dd>
                     </dl>
                   </div>
@@ -320,7 +322,7 @@ const AdminDashboard: React.FC = () => {
                         Stock Total
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {products && products.length > 0 ? products.reduce((total: number, product: any) => total + product.stock, 0) : 0}
+                        {productsLoading ? '...' : (products && products.length > 0 ? products.reduce((total: number, product: any) => total + product.stock, 0) : 0)}
                       </dd>
                     </dl>
                   </div>
