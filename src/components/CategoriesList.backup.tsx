@@ -1,0 +1,278 @@
+import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import useCategories from '../hooks/useCategories';
+import { useAuth } from '../context/AuthContext';
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+interface CategoryFormData {
+  name: string;
+  description: string;
+}
+
+const CategoriesList: React.FC = () => {
+  const { isAuthenticated, hasRole } = useAuth();
+  const {
+    categories,
+    loading,
+    error,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    toggleCategoryActive
+  } = useCategories();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [formData, setFormData] = useState<CategoryFormData>({
+    name: '',
+    description: ''
+  });
+
+  // Verificar autenticación y rol
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  if (!hasRole('admin')) {
+    return (
+      <div className="text-center p-4 bg-red-50 text-red-600">
+        No tienes permisos para acceder a esta sección.
+      </div>
+    );
+  }
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: ''
+    });
+    setEditingCategory(null);
+  };
+
+  const handleEdit = (category: Category) => {
+    setEditingCategory(category);
+    setFormData({
+      name: category.name || '',
+      description: category.description || ''
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingCategory) {
+        await updateCategory(editingCategory.id, formData);
+      } else {
+        await createCategory(formData);
+      }
+
+      setIsModalOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleDelete = async (categoryId: string) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
+      try {
+        await deleteCategory(categoryId);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <span className="ml-2 text-gray-600">Cargando categorías...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        Error: {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Header con botón agregar */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Gestión de Categorías</h2>
+        <button
+          onClick={() => {
+            resetForm();
+            setIsModalOpen(true);
+          }}
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center space-x-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Agregar Categoría</span>
+        </button>
+      </div>
+
+      {/* Tabla de categorías */}
+      {!Array.isArray(categories) || categories.length === 0 ? (
+        <div className="text-center text-gray-500 py-8">
+          No hay categorías registradas
+        </div>
+      ) : (
+        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nombre
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Descripción
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {categories.map((category) => (
+                <tr key={category.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-500">{category.description}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      category.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {category.isActive !== false ? 'Activa' : 'Inactiva'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center space-x-2">
+                      {/* Toggle Active/Inactive */}
+                      <button
+                        onClick={() => toggleCategoryActive && toggleCategoryActive(category.id)}
+                        className={`px-3 py-2 rounded-lg transition-colors ${
+                          category.isActive !== false
+                            ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                            : 'bg-green-100 text-green-600 hover:bg-green-200'
+                        }`}
+                        title={category.isActive !== false ? 'Desactivar categoría' : 'Activar categoría'}
+                      >
+                        {category.isActive !== false ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                      
+                      {/* Edit Button */}
+                      <button
+                        onClick={() => handleEdit(category)}
+                        className="px-3 py-2 rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors"
+                        title="Editar categoría"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handleDelete(category.id)}
+                        className="px-3 py-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                        title="Eliminar categoría"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal de crear/editar categoría */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {editingCategory ? 'Editar Categoría' : 'Agregar Categoría'}
+              </h3>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    rows={3}
+                    placeholder="Descripción de la categoría"
+                  />
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      resetForm();
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+                  >
+                    {editingCategory ? 'Actualizar' : 'Crear'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CategoriesList;
